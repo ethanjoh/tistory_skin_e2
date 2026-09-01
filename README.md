@@ -1,8 +1,16 @@
 <!-- 티스토리 스킨 프로젝트 README 문서 -->
 
-# 🎨 티스토리 반응형 블로그 스킨 (Custom Odyssey)
+# 🎨 티스토리 반응형 블로그 스킨 (Custom Odyssey) Edition 2.
 
 카카오 공식 **Odyssey (오디세이) 스킨**을 기반으로 가독성, 목록 레이아웃, 상단 메가메뉴, 모바일 반응성, 그리고 마크다운 다이어그램을 대폭 개선한 프리미엄 커스텀 티스토리 스킨입니다.
+
+---
+
+## 📸 스킨 미리보기
+
+![티스토리 스킨 배너](tistory_skin.jpg)
+
+![스킨 스크린샷](screenshot.jpg)
 
 ---
 
@@ -66,7 +74,6 @@
 | [`CHANGELOG.md`](CHANGELOG.md) | 스킨 기능 수정 및 최적화 상세 변경 이력 |
 | [`README.md`](README.md) | 스킨 소개 및 설치 가이드 문서 |
 
-![](screenshot.jpg)
 
 ---
 
