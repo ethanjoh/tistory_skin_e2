@@ -66,6 +66,8 @@
 | [`CHANGELOG.md`](CHANGELOG.md) | 스킨 기능 수정 및 최적화 상세 변경 이력 |
 | [`README.md`](README.md) | 스킨 소개 및 설치 가이드 문서 |
 
+![](screenshot.jpg)
+
 ---
 
 ## 📄 라이선스
