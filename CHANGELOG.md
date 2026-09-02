@@ -2,7 +2,37 @@
 
 # CHANGELOG
 
-## [2026-09-01]
+## [2026-09-02]
+
+### 변경 목적
+- 1. 모바일 화면(또는 1060px 이하 반응형 뷰)에서 이미지가 없는 글의 `no-image` 배경 위에 깨진 이미지(broken image) 아이콘이 겹쳐서 표시되는 현상 수정
+- 2. 카테고리/검색 목록 상단 타이틀(`.title-search.title-border`)의 상단 여백(`padding-top: 15px`) 추가
+- 3. 메인 화면 비동기 카테고리 로더에서 Daum CDN 프록시 캐시로 인한 구버전 `no-image.jpg` 노출 방지 및 필터링
+
+### 주요 결정 사항
+1. **HTML 템플릿 내 불필요한 `img` 태그 제거 (`skin.html`)**:
+   - 카테고리/검색 목록(`s_list_rep`), 공지사항(`s_notice_rep`), 커버 템플릿(`crop`, `resize`, `thumbnail`, `poster`) 내에서 썸네일 박스 내부의 빈 `img` 태그를 제거하고 `<p class="thumbnail" ...></p>` 구조로 통일.
+   - 대표 이미지가 없을 때 빈 `src=""`를 가진 `img` 태그가 생성되어 브라우저에서 깨진 이미지 아이콘을 렌더링하던 원인을 제거.
+2. **모바일 미디어 쿼리 내 썸네일 `img` 숨김 보장 (`style.css`)**:
+   - 모바일 미디어 쿼리(`@media screen and (max-width: 1060px)`)에서 `.thumbnail img`, `.img-thumbnail`에 적용되어 있던 `display: block !important` 강제 노출 규칙을 `display: none !important`로 변경하여 모든 해상도에서 썸네일 내부 `img` 태그로 인한 아이콘 노출 원천 차단.
+   - `.article-type-resize`의 호버 애니메이션 선택자를 `.thumbnail`로 통일.
+3. **타이틀 상단 패딩 추가 (`style.css`)**:
+   - `.title-search.title-border`에 `padding-top: 15px;`를 적용하여 상단 배너/영역과의 간격을 자연스럽게 확보.
+4. **메인 화면 카테고리 로더의 `no-image` CDN 프록시 URL 필터링 (`skin.html`)**:
+   - 카테고리 글 파싱 시 `style` 또는 `src`에 `no-image`가 포함된 Daum CDN 프록시 URL을 무시하도록 필터링하여, 글 자체의 이미지가 없을 때 인라인 스타일을 비우고 `style.css`의 최신 배경 이미지(`no-image.jpg`)가 직접 적용되도록 개선.
+
+### 수정한 파일
+- `skin.html`: 목록 및 커버 템플릿의 썸네일 내부 불필요한 `img` 태그 제거, 카테고리 로더 JS에 no-image 필터링 추가
+- `style.css`: 모바일 미디어 쿼리 내 썸네일 `img` 강제 노출 규칙 제거 및 숨김 처리, `.title-search.title-border`에 `padding-top: 15px` 추가
+- `CHANGELOG.md`: 작업 내역 기록
+
+### 테스트 결과
+- 모바일 및 반응형 뷰에서 썸네일이 없는 글의 경우 깨진 이미지 아이콘 없이 깔끔하게 `no-image` 배경만 렌더링됨을 확인
+- 썸네일이 있는 글의 경우 기존과 동일하게 배경 이미지가 정상 표시됨을 검증
+- 카테고리/검색 타이틀 영역 상단에 15px의 여백이 깔끔하게 적용됨을 확인
+- Daum CDN의 이전 썸네일 캐시 간섭 없이 새로 업로드한 `no-image.jpg`가 즉시 표시됨을 검증
+
+---
 
 ### 변경 목적
 - `README.md` 문서에 최신 스킨 기능 소개를 종합 반영하고, 스킨 적용 가이드에 "Odyssey 기본 스킨 선적용 후 html 편집" 필수 단계 명시

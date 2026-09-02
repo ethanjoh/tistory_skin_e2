@@ -2923,6 +2923,7 @@ html {
   color: #ef402f;
 }
 .title-search.title-border {
+  padding-top: 15px;
   margin-bottom: 29px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e8e8e8;
@@ -4232,7 +4233,7 @@ hr[data-ke-style='style8'],
 /* 썸네일 라운드 & 호버 애니메이션 */
 .article-type-common .thumbnail,
 .article-type-poster .thumbnail,
-.article-type-resize .thumbnail img,
+.article-type-resize .thumbnail,
 .article-type-crop .thumbnail {
   border-radius: 12px !important;
   overflow: hidden !important;
@@ -4241,7 +4242,7 @@ hr[data-ke-style='style8'],
 
 .article-type-poster:hover .thumbnail,
 .article-type-common:hover .thumbnail,
-.article-type-resize:hover .thumbnail img,
+.article-type-resize:hover .thumbnail,
 .article-type-crop:hover .thumbnail {
   transform: scale(1.05) !important;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
@@ -4676,10 +4677,7 @@ hr[data-ke-style='style8'],
   .area-common .article-type-common:not(.article-type-grid2):first-of-type .thumbnail img,
   .area-common .article-type-poster:first-of-type .thumbnail img,
   .box-article:not(.box-article-grid2) article:not(.article-type-grid2):first-of-type .thumbnail img {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    display: none !important;
   }
 
   .area-common .article-type-common:not(.article-type-grid2):first-of-type .article-content,
@@ -4993,10 +4991,7 @@ hr[data-ke-style='style8'],
   .article-type-common .thumbnail img,
   .thumbnail img,
   .img-thumbnail {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    display: none !important;
   }
 
   /* 좌측 텍스트 영역: 가로 공간 100% 확장 */

@@ -172,9 +172,7 @@
                       data-tiara-plink="[##_list_rep_link_##]"
                       data-tiara-id="[##_list_rep_link_##]"
                     >
-                      <p class="thumbnail" <s_list_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_list_rep_thumbnail_raw_url_##]')" </s_list_rep_thumbnail>>
-                        <img src="[##_list_rep_thumbnail_raw_url_##]" class="img-thumbnail" role="presentation" />
-                      </p>
+                      <p class="thumbnail" <s_list_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_list_rep_thumbnail_raw_url_##]')" </s_list_rep_thumbnail>></p>
                     </a>
 
                     <div class="article-content">
@@ -388,9 +386,7 @@
                       data-tiara-plink="[##_notice_rep_link_##]"
                       data-tiara-id="[##_notice_rep_link_##]"
                     >
-                      <p class="thumbnail notice-thumbnail" <s_notice_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_notice_rep_thumbnail_url_##]')" </s_notice_rep_thumbnail>>
-                        <img src="" class="img-thumbnail" role="presentation" />
-                      </p>
+                      <p class="thumbnail notice-thumbnail" <s_notice_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_notice_rep_thumbnail_url_##]')" </s_notice_rep_thumbnail>></p>
                     </a>
                     <div class="article-content">
                       <a href="[##_notice_rep_link_##]" class="link-article"
@@ -567,9 +563,7 @@
                         <s_cover_item>
                           <article class="article-type-common article-type-crop">
                             <a href="[##_cover_item_url_##]" class="link-article">
-                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>>
-                                <img src="" class="img-thumbnail" role="presentation" />
-                              </p>
+                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>></p>
                             </a>
                             <div class="article-content">
                               <a href="[##_cover_item_url_##]" class="link-article">
@@ -601,9 +595,7 @@
                         <s_cover_item>
                           <article class="article-type-common article-type-resize">
                             <a href="[##_cover_item_url_##]" class="link-article">
-                              <p class="thumbnail" has-thumbnail="1">
-                                <img loading="lazy" <s_cover_item_thumbnail>src="[##_cover_item_thumbnail_##]"</s_cover_item_thumbnail> class="img-thumbnail" role="presentation" />
-                              </p>
+                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>></p>
                             </a>
                             <div class="article-content">
                               <a href="[##_cover_item_url_##]" class="link-article">
@@ -640,9 +632,7 @@
                         <s_cover_item>
                           <article class="article-type-common article-type-thumbnail">
                             <a href="[##_cover_item_url_##]" class="link-article">
-                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>>
-                                <img src="" class="img-thumbnail" role="presentation" />
-                              </p>
+                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>></p>
                             </a>
                             <div class="article-content">
                               <a href="[##_cover_item_url_##]" class="link-article">
@@ -680,9 +670,7 @@
                           <s_cover_item>
                             <article class="article-type-common article-type-poster">
                               <a href="[##_cover_item_url_##]" class="link-article">
-                                <p class="thumbnail" <s_cover_item_thumbnail>has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>>
-                                  <img src="" class="img-thumbnail" role="presentation" />
-                                </p>
+                                <p class="thumbnail" <s_cover_item_thumbnail>has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>></p>
                               </a>
                               <div class="article-content">
                                 <a href="[##_cover_item_url_##]" class="link-article">
@@ -1219,15 +1207,22 @@
                 const linkEl = art.querySelector('a.link-article');
                 const postUrl = linkEl ? linkEl.getAttribute('href') : '#';
                 
-                // 썸네일 이미지 파싱
+                // 썸네일 이미지 파싱 (글 자체의 이미지가 있는 경우만 추출)
                 let thumbStyle = '';
                 const thumbEl = art.querySelector('.thumbnail');
                 const imgEl = art.querySelector('.img-thumbnail');
                 
                 if (thumbEl && thumbEl.getAttribute('style') && thumbEl.getAttribute('style').indexOf('url(') !== -1) {
-                  thumbStyle = thumbEl.getAttribute('style');
+                  const styleAttr = thumbEl.getAttribute('style');
+                  // Daum CDN 프록시의 no-image URL 필터링 -> style.css의 기본 배경 이미지 적용
+                  if (styleAttr.indexOf('no-image') === -1 && styleAttr.indexOf('icon-no-img') === -1) {
+                    thumbStyle = styleAttr;
+                  }
                 } else if (imgEl && imgEl.getAttribute('src')) {
-                  thumbStyle = 'background-image:url(\'' + imgEl.getAttribute('src') + '\');';
+                  const imgSrc = imgEl.getAttribute('src');
+                  if (imgSrc.indexOf('no-image') === -1 && imgSrc.indexOf('icon-no-img') === -1) {
+                    thumbStyle = 'background-image:url(\'' + imgSrc + '\');';
+                  }
                 }
 
                 // 제목 추출 (모든 스킨 변형 및 첫 번째 글 마크업 대응)
