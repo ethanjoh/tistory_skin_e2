@@ -562,7 +562,7 @@
                   </s_cover>
                   <!-- // type-news-headline -->
 
-                  <!-- type-category-grid (2열 그리드 커버) -->
+                  <!-- type-category-grid (3열 카드 그리드 커버) -->
                   <s_cover name='category-grid'>
                     <div class="area-cover area-cover-grid2">
                       <div class="box-cover-title">
@@ -580,13 +580,10 @@
                             <div class="article-content">
                               <a href="[##_cover_item_url_##]" class="link-article link-text">
                                 <strong class="title">[##_cover_item_title_##]</strong>
-                                <p class="summary">[##_cover_item_summary_##]</p>
                               </a>
                               <div class="box-meta">
                                 <s_cover_item_article_info>
-                                  <a href="[##_cover_item_url_##]" class="link-category">[##_cover_item_category_##]</a>
                                   <span class="date">[##_cover_item_simple_date_##]</span>
-                                  <span class="reply">[##_cover_item_comment_count_##]</span>
                                 </s_cover_item_article_info>
                               </div>
                             </div>
@@ -1477,7 +1474,7 @@
                   const articles = doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common');
                   
                   const posts = [];
-                  const maxCount = Math.min(articles.length, 2); // 각 카테고리당 최신 글 2개
+                  const maxCount = Math.min(articles.length, 3); // 각 카테고리당 최신 글 3개
 
                   for (let i = 0; i < maxCount; i++) {
                     const parsed = parseArticleElement(articles[i]);
@@ -1521,17 +1518,10 @@
                   listHtml += '  <div class="article-content">';
                   listHtml += '    <a href="' + post.url + '" class="link-article link-text">';
                   listHtml += '      <strong class="title">' + escapeHtml(post.title) + '</strong>';
-                  if (post.summary) {
-                    listHtml += '      <p class="summary">' + escapeHtml(post.summary) + '</p>';
-                  }
                   listHtml += '    </a>';
                   listHtml += '    <div class="box-meta">';
-                  listHtml += '      <a href="' + res.category.url + '" class="link-category">' + escapeHtml(post.category || res.category.name) + '</a>';
                   if (post.date) {
                     listHtml += '      <span class="date">' + escapeHtml(post.date) + '</span>';
-                  }
-                  if (post.reply) {
-                    listHtml += '      <span class="reply">' + escapeHtml(post.reply) + '</span>';
                   }
                   listHtml += '    </div>';
                   listHtml += '  </div>';
