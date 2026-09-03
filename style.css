@@ -226,6 +226,7 @@ body {
 }
 
 html {
+  font-size: 16px;
   box-sizing: border-box;
 }
 
@@ -1828,9 +1829,9 @@ html {
   width: 100%;
   max-width: 1150px;
   margin: 0 0 33px 0;
-  font-size: 48px;
+  font-size: 1.75rem;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.6;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -2654,8 +2655,8 @@ div[class*="another_category"] {
 }
 
 .article-view p {
-  font-size: 16px;
-  line-height: 26px;
+  font-size: 1.125rem;
+  line-height: 1.75;
   color: #222;
 }
 
@@ -2669,27 +2670,27 @@ div[class*="another_category"] {
 }
 
 .article-view h1 {
-  font-size: 32px;
-  line-height: 1.33;
+  font-size: 2.25rem;
+  line-height: 1.6;
 }
 .article-view h2 {
-  font-size: 24px;
-  line-height: 1.38;
+  font-size: 1.75rem;
+  line-height: 1.6;
 }
 .article-view h3 {
-  font-size: 20px;
-  line-height: 1.4;
+  font-size: 1.375rem;
+  line-height: 1.65;
 }
 .article-view h4 {
-  font-size: 18px;
-  line-height: 1.33;
+  font-size: 1.1875rem;
+  line-height: 1.65;
 }
 
 .article-view blockquote {
   margin: 0;
   padding-left: 19px;
   border-left: 1px solid;
-  font-size: 16px;
+  font-size: 1.125rem;
   line-height: 1.75;
   color: rgba(0, 0, 0, 0.54);
 }
@@ -2704,8 +2705,8 @@ div[class*="another_category"] {
   margin-top: 18px;
 }
 .article-view ul li {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 1.125rem;
+  line-height: 1.75;
   color: rgba(0, 0, 0, 0.87);
   word-break: break-all;
 }
@@ -2715,7 +2716,7 @@ div[class*="another_category"] {
 }
 .article-view ol li {
   margin-bottom: 6px;
-  font-size: 16px;
+  font-size: 1.125rem;
   line-height: 1.75;
   color: rgba(0, 0, 0, 0.87);
   word-break: break-all;
@@ -2726,24 +2727,29 @@ div[class*="another_category"] {
 }
 .article-view table thead tr {
   background: rgba(0, 0, 0, 0.05);
-  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.6;
   color: #000;
 }
 
 .article-view table tr th,
 .article-view table tr td {
   padding: 7px;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .article-view pre {
   background: rgba(0, 0, 0, 0.05);
-  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.65;
   color: rgba(34, 85, 51, 0.87);
   white-space: pre-wrap;
 }
 
 .article-view .cap1 {
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.6;
   color: rgba(0, 0, 0, 0.54);
 }
 .article-view hr {
@@ -2778,8 +2784,9 @@ div[class*="another_category"] {
   text-decoration: none;
 }
 .article-view .footnotes li {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.38);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.54);
 }
 .article-view .table-overflow {
   overflow-x: auto;
@@ -3236,27 +3243,28 @@ div[class*="another_category"] {
   margin: 20px 0 0 0;
 }
 #article-view h2[data-ke-size] {
-  font-size: 1.62em;
-  line-height: 1.46;
+  font-size: 1.75rem;
+  line-height: 1.6;
 }
 #article-view h3[data-ke-size] {
-  font-size: 1.44em;
-  line-height: 1.48;
+  font-size: 1.375rem;
+  line-height: 1.65;
 }
 #article-view h4[data-ke-size] {
-  font-size: 1.25em;
-  line-height: 1.55;
+  font-size: 1.1875rem;
+  line-height: 1.65;
 }
 #article-view p[data-ke-size='size18'] {
-  font-size: 1.12em;
-  line-height: 1.67;
+  font-size: 1.25rem !important;
+  line-height: 1.75 !important;
 }
 #article-view p[data-ke-size='size16'] {
-  line-height: 1.75;
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
 }
 #article-view p[data-ke-size='size14'] {
-  font-size: 0.87em;
-  line-height: 1.71;
+  font-size: 0.875rem !important;
+  line-height: 1.65 !important;
 }
 #article-view h2,
 #article-view h3,
@@ -3308,9 +3316,9 @@ div[class*="another_category"] {
   text-align: center;
   background: url(https://t1.daumcdn.net/axz_keditor/dist/latest/image/blockquote-style1.svg) no-repeat 50% 0;
   padding: 34px 0 0 0;
-  font-size: 1.12em;
+  font-size: 1.125rem;
   color: #333;
-  line-height: 1.67;
+  line-height: 1.75;
   border: 0 none;
   font-family: "Noto Serif KR";
 }
@@ -3321,7 +3329,7 @@ div[class*="another_category"] {
   padding: 1px 0 0 12px;
   color: #666;
   line-height: 1.75;
-  font-size: 1em;
+  font-size: 1.125rem;
   text-align: left;
 }
 #article-view blockquote[data-ke-style='style3'] {
@@ -3330,7 +3338,7 @@ div[class*="another_category"] {
   text-align: left;
   padding: 21px 25px 20px 25px;
   color: #666;
-  font-size: 1em;
+  font-size: 1.125rem;
   line-height: 1.75;
 }
 #article-view blockquote {
@@ -3471,7 +3479,8 @@ div[class*="another_category"] {
   margin-top: 10px;
 }
 #article-view figure figcaption {
-  font-size: 13px;
+  font-size: 0.875rem;
+  line-height: 1.6;
   color: #777;
   word-break: break-word;
   padding-top: 10px;
@@ -3593,7 +3602,8 @@ hr[data-ke-style='style8'],
 #article-view table td {
   word-break: break-word;
   padding: 8px;
-  font-size: 15px;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 #article-view table[data-ke-style='style1'] tr:first-child td {
   border-bottom: 1px solid #6ed3d8;
@@ -3811,11 +3821,11 @@ hr[data-ke-style='style8'],
 }
 
 #article-view pre code.hljs {
-  font-size: 14px;
+  font-size: 0.9375rem;
   padding: 20px;
   font-family: SF Mono, Menlo, Consolas, Monaco, monospace;
   border: solid 1px #ebebeb;
-  line-height: 1.71;
+  line-height: 1.65;
   overflow: auto;
 }
 #article-view .moreless-content :first-child {
@@ -3830,15 +3840,16 @@ hr[data-ke-style='style8'],
 }
 #article-view div[data-ke-type='moreLess'] .btn-toggle-moreless {
   color: #909090;
-  font-size: 16px;
-  line-height: 26px;
+  font-size: 1.125rem;
+  line-height: 1.75;
   cursor: pointer;
   text-decoration: none;
 }
 #article-view ul li,
 #article-view ol li {
+  font-size: 1.125rem;
   margin: 0 0 3px 22px;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 #article-view ul,
 #article-view ol {
@@ -3963,7 +3974,8 @@ hr[data-ke-style='style8'],
 #article-view figure.imageslideblock figcaption {
   text-align: center;
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 #article-view figure.imageslideblock.alignLeft {
   text-align: left;
@@ -5425,7 +5437,8 @@ hr[data-ke-style='style8'],
   }
   .article-header .title-article {
     padding-right: 30px;
-    font-size: 30px;
+    font-size: 1.5rem;
+    line-height: 1.6;
   }
   .article-header .box-info {
     font-size: 11px;
@@ -5810,6 +5823,15 @@ body {
   color: #222222;
 }
 
+.article-view p,
+#article-view p,
+#article-view p[data-ke-size='size16'],
+.entry-content p,
+.tt_article_useless_p_margin p {
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
+}
+
 /* 4. 모든 제목(Header/Title)에 Noto Serif KR 적용 */
 /* (1) 본문 내부 제목 (h1, h2, h3, h4) */
 .article-view h1,
@@ -5826,6 +5848,37 @@ body {
 .entry-content h4 {
   font-family: 'Noto Serif KR', serif;
   font-weight: 700 !important;
+}
+
+.article-view h1,
+#article-view h1,
+.entry-content h1 {
+  font-size: 2.25rem !important;
+  line-height: 1.6 !important;
+}
+
+.article-view h2,
+#article-view h2,
+#article-view h2[data-ke-size],
+.entry-content h2 {
+  font-size: 1.75rem !important;
+  line-height: 1.6 !important;
+}
+
+.article-view h3,
+#article-view h3,
+#article-view h3[data-ke-size],
+.entry-content h3 {
+  font-size: 1.375rem !important;
+  line-height: 1.65 !important;
+}
+
+.article-view h4,
+#article-view h4,
+#article-view h4[data-ke-size],
+.entry-content h4 {
+  font-size: 1.1875rem !important;
+  line-height: 1.65 !important;
 }
 
 /* (2) 상세페이지 상단 글 제목 & 카테고리 배너 타이틀 */
@@ -5869,6 +5922,8 @@ body {
 .article-content figcaption,
 .article-view figcaption {
   font-family: "Pretendard", sans-serif;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
 }
 
 .entry-content code,
