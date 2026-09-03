@@ -511,6 +511,9 @@
             </div>
             <!-- area-view -->
 
+            <!-- 메인 페이지 전용: 최신글 신문형 5개 기사 헤드라인 노출 컨테이너 -->
+            <div id="main-headline-section" class="area-main-headline" style="display:none;"></div>
+
             <!-- 메인 페이지 전용: 각 카테고리별 최신글 2열 노출 컨테이너 -->
             <div id="main-category-section" class="area-main-category" style="display:none;"></div>
 
@@ -519,6 +522,41 @@
               <!-- area-common -->
               <div class="area-common">
                 <s_cover_rep>
+
+                  <!-- type-news-headline (신문/뉴스 포털 5개 기사 커버) -->
+                  <s_cover name='news-headline'>
+                    <div class="area-cover area-cover-news-headline">
+                      <div class="box-cover-title">
+                        <h2 class="title-cover">[##_cover_title_##]</h2>
+                        <s_cover_url>
+                          <a href="[##_cover_url_##]" class="link-title">더보기</a>
+                        </s_cover_url>
+                      </div>
+                      <div class="box-article box-article-news-headline">
+                        <s_cover_item>
+                          <article class="article-type-common article-type-news">
+                            <a href="[##_cover_item_url_##]" class="link-article link-thumb">
+                              <p class="thumbnail" <s_cover_item_thumbnail> has-thumbnail="1" style="background-image:url('[##_cover_item_thumbnail_##]')" </s_cover_item_thumbnail>></p>
+                            </a>
+                            <div class="article-content">
+                              <a href="[##_cover_item_url_##]" class="link-article link-text">
+                                <strong class="title">[##_cover_item_title_##]</strong>
+                                <p class="summary">[##_cover_item_summary_##]</p>
+                              </a>
+                              <div class="box-meta">
+                                <s_cover_item_article_info>
+                                  <a href="[##_cover_item_url_##]" class="link-category">[##_cover_item_category_##]</a>
+                                  <span class="date">[##_cover_item_simple_date_##]</span>
+                                  <span class="reply">[##_cover_item_comment_count_##]</span>
+                                </s_cover_item_article_info>
+                              </div>
+                            </div>
+                          </article>
+                        </s_cover_item>
+                      </div>
+                    </div>
+                  </s_cover>
+                  <!-- // type-news-headline -->
 
                   <!-- type-category-grid (2열 그리드 커버) -->
                   <s_cover name='category-grid'>
@@ -1134,7 +1172,7 @@
       updateMegaMenuHeight();
     });
   </script>
-  <!-- 메인 페이지 카테고리별 최신글 2열 노출 스크립트 -->
+  <!-- 메인 페이지 최신글 뉴스 헤드라인 & 카테고리별 2열 노출 스크립트 -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const pathname = window.location.pathname;
@@ -1142,189 +1180,372 @@
       const isMainPage = (pathname === '/' || pathname === '' || pathname === '/index.html' || document.body.id === 'tt-body-index') && (!search || search.indexOf('page=') !== -1);
       
       const existingCover = document.querySelector('.area-main > .area-common:not(.area-list) > .area-cover, .area-cover');
+      const headlineSection = document.getElementById('main-headline-section');
       const categorySection = document.getElementById('main-category-section');
       const areaList = document.querySelector('.area-list');
       const areaView = document.querySelector('.area-view');
       const areaPaging = document.querySelector('.area-paging');
       const areaPagingMore = document.querySelector('.area-paging-more');
 
+      // 글 요소에서 데이터(제목, 요약문, 썸네일, 날짜, 카테고리 등) 추출 함수
+      function parseArticleElement(art) {
+        const linkEl = art.querySelector('a.link-article') || art.querySelector('a');
+        const postUrl = linkEl ? linkEl.getAttribute('href') : '#';
+        
+        // 썸네일 스타일 추출
+        let thumbStyle = '';
+        const thumbEl = art.querySelector('.thumbnail');
+        const imgEl = art.querySelector('.img-thumbnail, img');
+        
+        if (thumbEl && thumbEl.getAttribute('style') && thumbEl.getAttribute('style').indexOf('url(') !== -1) {
+          const styleAttr = thumbEl.getAttribute('style');
+          if (styleAttr.indexOf('no-image') === -1 && styleAttr.indexOf('icon-no-img') === -1) {
+            thumbStyle = styleAttr;
+          }
+        } else if (imgEl && imgEl.getAttribute('src')) {
+          const imgSrc = imgEl.getAttribute('src');
+          if (imgSrc.indexOf('no-image') === -1 && imgSrc.indexOf('icon-no-img') === -1) {
+            thumbStyle = 'background-image:url(\'' + imgSrc + '\');';
+          }
+        } else if (linkEl && linkEl.getAttribute('data-tiara-image')) {
+          const tiaraImg = linkEl.getAttribute('data-tiara-image');
+          if (tiaraImg && tiaraImg.indexOf('no-image') === -1 && tiaraImg.indexOf('icon-no-img') === -1) {
+            thumbStyle = 'background-image:url(\'' + tiaraImg + '\');';
+          }
+        }
+
+        // 제목 추출
+        let titleText = '';
+        const titleEl = art.querySelector('.title, .title-article, strong.title, a.link-article strong, strong, h2, h3');
+        if (titleEl) {
+          titleText = titleEl.textContent.trim();
+        }
+
+        // 요약문 추출
+        let summaryText = '';
+        const summaryEl = art.querySelector('.summary, .desc, p.summary, p.desc');
+        if (summaryEl) {
+          summaryText = summaryEl.textContent.trim();
+        }
+        if (summaryText === titleText) {
+          summaryText = '';
+        }
+
+        const dateEl = art.querySelector('.date');
+        const dateText = dateEl ? dateEl.textContent.trim() : '';
+
+        const catEl = art.querySelector('.link-category');
+        const catText = catEl ? catEl.textContent.trim() : '';
+
+        const replyEl = art.querySelector('.reply');
+        const replyText = replyEl ? replyEl.textContent.trim() : '';
+
+        return {
+          url: postUrl,
+          thumbStyle: thumbStyle,
+          title: titleText,
+          summary: summaryText,
+          date: dateText,
+          category: catText,
+          reply: replyText
+        };
+      }
+
+      // 신문형 5개 기사 뉴스 헤드라인 HTML 생성 함수
+      function renderHeadlineHtml(posts) {
+        if (!posts || posts.length === 0) return '';
+        const p0 = posts[0];
+        const p1 = posts[1] || null;
+        const p2 = posts[2] || null;
+        const p3 = posts[3] || null;
+        const p4 = posts[4] || null;
+
+        let html = '<div class="area-cover area-cover-news-headline">';
+        html += '  <div class="news-headline-wrap">';
+        
+        // 1. 좌측 메인 영역 (68~70%)
+        html += '    <div class="news-headline-left">';
+        
+        // 1번 Hero 기사 (상단 전체 너비 대형 제목 + 좌측 대형 이미지 / 우측 본문 요약문)
+        html += '      <article class="news-hero-article">';
+        html += '        <a href="' + p0.url + '" class="hero-title-link">';
+        html += '          <h2 class="hero-title">' + escapeHtml(p0.title) + '</h2>';
+        html += '        </a>';
+        html += '        <div class="hero-body">';
+        html += '          <a href="' + p0.url + '" class="hero-thumb-link link-thumb">';
+        html += '            <p class="hero-thumb thumbnail"' + (p0.thumbStyle ? ' style="' + p0.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
+        html += '          </a>';
+        html += '          <div class="hero-content">';
+        html += '            <a href="' + p0.url + '" class="hero-summary-link link-text">';
+        if (p0.summary) {
+          html += '              <p class="hero-summary">' + escapeHtml(p0.summary) + '</p>';
+        }
+        html += '            </a>';
+        html += '            <div class="box-meta">';
+        if (p0.category) {
+          html += '              <span class="link-category">' + escapeHtml(p0.category) + '</span>';
+        }
+        if (p0.date) {
+          html += '              <span class="date">' + escapeHtml(p0.date) + '</span>';
+        }
+        if (p0.reply) {
+          html += '              <span class="reply">' + escapeHtml(p0.reply) + '</span>';
+        }
+        html += '            </div>';
+        html += '          </div>';
+        html += '        </div>';
+        html += '      </article>';
+
+        // 2번, 3번 서브 기사 (좌측 하단 2열 배치)
+        if (p1 || p2) {
+          html += '      <div class="news-divider"></div>';
+          html += '      <div class="news-sub-row">';
+          
+          [p1, p2].forEach(function(subPost) {
+            if (!subPost) return;
+            html += '        <article class="news-sub-article">';
+            html += '          <a href="' + subPost.url + '" class="sub-thumb-link link-thumb">';
+            html += '            <p class="sub-thumb thumbnail"' + (subPost.thumbStyle ? ' style="' + subPost.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
+            html += '          </a>';
+            html += '          <div class="sub-content">';
+            html += '            <a href="' + subPost.url + '" class="sub-text-link link-text">';
+            html += '              <strong class="sub-title">' + escapeHtml(subPost.title) + '</strong>';
+            if (subPost.summary) {
+              html += '              <p class="sub-summary">' + escapeHtml(subPost.summary) + '</p>';
+            }
+            html += '            </a>';
+            html += '            <div class="box-meta">';
+            if (subPost.category) {
+              html += '              <span class="link-category">' + escapeHtml(subPost.category) + '</span>';
+            }
+            if (subPost.date) {
+              html += '              <span class="date">' + escapeHtml(subPost.date) + '</span>';
+            }
+            html += '            </div>';
+            html += '          </div>';
+            html += '        </article>';
+          });
+          
+          html += '      </div>';
+        }
+
+        html += '    </div>'; // end news-headline-left
+
+        // 2. 우측 사이드 영역 (30~32% - 4, 5번 기사 수직 2단 배치, 제목/썸네일만 노출)
+        if (p3 || p4) {
+          html += '    <div class="news-headline-right">';
+          
+          // 4번 기사
+          if (p3) {
+            html += '      <article class="news-side-article">';
+            html += '        <a href="' + p3.url + '" class="side-thumb-link link-thumb">';
+            html += '          <p class="side-thumb thumbnail"' + (p3.thumbStyle ? ' style="' + p3.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
+            html += '        </a>';
+            html += '        <div class="side-content">';
+            html += '          <a href="' + p3.url + '" class="side-text-link link-text">';
+            html += '            <strong class="side-title">' + escapeHtml(p3.title) + '</strong>';
+            html += '          </a>';
+            html += '          <div class="box-meta">';
+            if (p3.category) {
+              html += '            <span class="link-category">' + escapeHtml(p3.category) + '</span>';
+            }
+            if (p3.date) {
+              html += '            <span class="date">' + escapeHtml(p3.date) + '</span>';
+            }
+            html += '          </div>';
+            html += '        </div>';
+            html += '      </article>';
+          }
+
+          if (p3 && p4) {
+            html += '      <div class="news-divider"></div>';
+          }
+
+          // 5번 기사
+          if (p4) {
+            html += '      <article class="news-side-article">';
+            html += '        <a href="' + p4.url + '" class="side-thumb-link link-thumb">';
+            html += '          <p class="side-thumb thumbnail"' + (p4.thumbStyle ? ' style="' + p4.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
+            html += '        </a>';
+            html += '        <div class="side-content">';
+            html += '          <a href="' + p4.url + '" class="side-text-link link-text">';
+            html += '            <strong class="side-title">' + escapeHtml(p4.title) + '</strong>';
+            html += '          </a>';
+            html += '          <div class="box-meta">';
+            if (p4.category) {
+              html += '            <span class="link-category">' + escapeHtml(p4.category) + '</span>';
+            }
+            if (p4.date) {
+              html += '            <span class="date">' + escapeHtml(p4.date) + '</span>';
+            }
+            html += '          </div>';
+            html += '        </div>';
+            html += '      </article>';
+          }
+
+          html += '    </div>'; // end news-headline-right
+        }
+
+        html += '  </div>'; // end news-headline-wrap
+        html += '</div>'; // end area-cover-news-headline
+
+        return html;
+      }
+
       // 티스토리 관리자 커버 설정이 활성화되어 있지 않고, 메인 홈 페이지인 경우 자동 로딩 실행
-      if (isMainPage && !existingCover && categorySection) {
+      if (isMainPage && !existingCover && (headlineSection || categorySection)) {
         if (areaList) areaList.style.display = 'none';
         if (areaView) areaView.style.display = 'none';
         if (areaPaging) areaPaging.style.display = 'none';
         if (areaPagingMore) areaPagingMore.style.display = 'none';
-        categorySection.style.display = 'block';
 
-        // 1차 카테고리 목록 추출
-        const categoryLinks = Array.from(document.querySelectorAll('.area-gnb .topnavmenu .category_list > li > a.link_item, .box-category .category_list > li > a.link_item'));
-        
-        const uniqueCategories = [];
-        const seenUrls = new Set();
-
-        categoryLinks.forEach(function(link) {
-          const href = link.getAttribute('href');
-          if (href && href !== '/category' && href !== '#' && !seenUrls.has(href)) {
-            seenUrls.add(href);
-            const clone = link.cloneNode(true);
-            const cntSpan = clone.querySelector('.c_cnt');
-            if (cntSpan) cntSpan.remove();
-            const catName = clone.textContent.trim();
-
-            if (catName) {
-              uniqueCategories.push({
-                name: catName,
-                url: href
+        // 1. 최신글 5개 로딩 및 헤드라인 렌더링
+        if (headlineSection) {
+          const domArticles = Array.from(document.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common'));
+          
+          if (domArticles.length >= 3) {
+            const latestPosts = domArticles.slice(0, 5).map(parseArticleElement);
+            headlineSection.innerHTML = renderHeadlineHtml(latestPosts);
+            headlineSection.style.display = 'block';
+          } else {
+            // DOM에 글이 부족할 경우 /category(전체 글 목록)를 비동기 fetch
+            fetch('/category')
+              .then(function(res) {
+                if (!res.ok) throw new Error('Fetch /category failed');
+                return res.text();
+              })
+              .then(function(htmlText) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                const fetchedArticles = Array.from(doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common'));
+                if (fetchedArticles.length > 0) {
+                  const latestPosts = fetchedArticles.slice(0, 5).map(parseArticleElement);
+                  headlineSection.innerHTML = renderHeadlineHtml(latestPosts);
+                  headlineSection.style.display = 'block';
+                }
+              })
+              .catch(function(err) {
+                console.warn('[Headline Loader] Fallback failed', err);
               });
-            }
           }
-        });
-
-        if (uniqueCategories.length === 0) {
-          if (areaView) areaView.style.display = '';
-          categorySection.style.display = 'none';
-          return;
         }
 
-        categorySection.innerHTML = '<div class="main-category-loading"><p>카테고리별 최신글을 불러오는 중입니다...</p></div>';
+        // 2. 카테고리별 2열 그리드 로딩
+        if (categorySection) {
+          categorySection.style.display = 'block';
 
-        const fetchPromises = uniqueCategories.map(function(cat) {
-          return fetch(cat.url)
-            .then(function(res) {
-              if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-              return res.text();
-            })
-            .then(function(htmlText) {
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(htmlText, 'text/html');
-              const articles = doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common');
-              
-              const posts = [];
-              const maxCount = Math.min(articles.length, 2); // 각 카테고리당 최신 글 2개
+          // 1차 카테고리 목록 추출
+          const categoryLinks = Array.from(document.querySelectorAll('.area-gnb .topnavmenu .category_list > li > a.link_item, .box-category .category_list > li > a.link_item'));
+          
+          const uniqueCategories = [];
+          const seenUrls = new Set();
 
-              for (let i = 0; i < maxCount; i++) {
-                const art = articles[i];
-                const linkEl = art.querySelector('a.link-article');
-                const postUrl = linkEl ? linkEl.getAttribute('href') : '#';
-                
-                // 썸네일 이미지 파싱 (글 자체의 이미지가 있는 경우만 추출)
-                let thumbStyle = '';
-                const thumbEl = art.querySelector('.thumbnail');
-                const imgEl = art.querySelector('.img-thumbnail');
-                
-                if (thumbEl && thumbEl.getAttribute('style') && thumbEl.getAttribute('style').indexOf('url(') !== -1) {
-                  const styleAttr = thumbEl.getAttribute('style');
-                  // Daum CDN 프록시의 no-image URL 필터링 -> style.css의 기본 배경 이미지 적용
-                  if (styleAttr.indexOf('no-image') === -1 && styleAttr.indexOf('icon-no-img') === -1) {
-                    thumbStyle = styleAttr;
-                  }
-                } else if (imgEl && imgEl.getAttribute('src')) {
-                  const imgSrc = imgEl.getAttribute('src');
-                  if (imgSrc.indexOf('no-image') === -1 && imgSrc.indexOf('icon-no-img') === -1) {
-                    thumbStyle = 'background-image:url(\'' + imgSrc + '\');';
-                  }
-                }
+          categoryLinks.forEach(function(link) {
+            const href = link.getAttribute('href');
+            if (href && href !== '/category' && href !== '#' && !seenUrls.has(href)) {
+              seenUrls.add(href);
+              const clone = link.cloneNode(true);
+              const cntSpan = clone.querySelector('.c_cnt');
+              if (cntSpan) cntSpan.remove();
+              const catName = clone.textContent.trim();
 
-                // 제목 추출 (모든 스킨 변형 및 첫 번째 글 마크업 대응)
-                let titleText = '';
-                const titleEl = art.querySelector('.title, .title-article, strong.title, a.link-article strong, strong, h2, h3');
-                if (titleEl) {
-                  titleText = titleEl.textContent.trim();
-                }
-
-                // 요약문 추출
-                let summaryText = '';
-                const summaryEl = art.querySelector('.summary, .desc, p.summary, p.desc');
-                if (summaryEl) {
-                  summaryText = summaryEl.textContent.trim();
-                }
-                if (summaryText === titleText) {
-                  summaryText = '';
-                }
-
-                const dateEl = art.querySelector('.date');
-                const dateText = dateEl ? dateEl.textContent.trim() : '';
-
-                const catEl = art.querySelector('.link-category');
-                const catText = catEl ? catEl.textContent.trim() : cat.name;
-
-                const replyEl = art.querySelector('.reply');
-                const replyText = replyEl ? replyEl.textContent.trim() : '';
-
-                posts.push({
-                  url: postUrl,
-                  thumbStyle: thumbStyle,
-                  title: titleText,
-                  summary: summaryText,
-                  date: dateText,
-                  category: catText,
-                  reply: replyText
+              if (catName) {
+                uniqueCategories.push({
+                  name: catName,
+                  url: href
                 });
               }
-
-              return {
-                category: cat,
-                posts: posts
-              };
-            })
-            .catch(function(err) {
-              console.warn('[Category Loader] Error fetching ' + cat.name, err);
-              return { category: cat, posts: [] };
-            });
-        });
-
-        Promise.all(fetchPromises).then(function(results) {
-          categorySection.innerHTML = '';
-          let totalRendered = 0;
-
-          results.forEach(function(res) {
-            if (!res.posts || res.posts.length === 0) return;
-
-            totalRendered++;
-            const sectionDiv = document.createElement('div');
-            sectionDiv.className = 'area-cover area-cover-grid2';
-
-            let headerHtml = '<div class="box-cover-title">';
-            headerHtml += '<h2 class="title-cover"><a href="' + res.category.url + '">' + escapeHtml(res.category.name) + '</a></h2>';
-            headerHtml += '<a href="' + res.category.url + '" class="link-title">더보기</a>';
-            headerHtml += '</div>';
-
-            let listHtml = '<div class="box-article box-article-grid2">';
-            res.posts.forEach(function(post) {
-              listHtml += '<article class="article-type-common article-type-grid2">';
-              listHtml += '  <a href="' + post.url + '" class="link-article link-thumb">';
-              listHtml += '    <p class="thumbnail"' + (post.thumbStyle ? ' style="' + post.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
-              listHtml += '  </a>';
-              listHtml += '  <div class="article-content">';
-              listHtml += '    <a href="' + post.url + '" class="link-article link-text">';
-              listHtml += '      <strong class="title">' + escapeHtml(post.title) + '</strong>';
-              if (post.summary) {
-                listHtml += '      <p class="summary">' + escapeHtml(post.summary) + '</p>';
-              }
-              listHtml += '    </a>';
-              listHtml += '    <div class="box-meta">';
-              listHtml += '      <a href="' + res.category.url + '" class="link-category">' + escapeHtml(post.category || res.category.name) + '</a>';
-              if (post.date) {
-                listHtml += '      <span class="date">' + escapeHtml(post.date) + '</span>';
-              }
-              if (post.reply) {
-                listHtml += '      <span class="reply">' + escapeHtml(post.reply) + '</span>';
-              }
-              listHtml += '    </div>';
-              listHtml += '  </div>';
-              listHtml += '</article>';
-            });
-            listHtml += '</div>';
-
-            sectionDiv.innerHTML = headerHtml + listHtml;
-            categorySection.appendChild(sectionDiv);
+            }
           });
 
-          if (totalRendered === 0) {
-            if (areaView) areaView.style.display = '';
-            categorySection.style.display = 'none';
+          if (uniqueCategories.length > 0) {
+            categorySection.innerHTML = '<div class="main-category-loading"><p>카테고리별 최신글을 불러오는 중입니다...</p></div>';
+
+            const fetchPromises = uniqueCategories.map(function(cat) {
+              return fetch(cat.url)
+                .then(function(res) {
+                  if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+                  return res.text();
+                })
+                .then(function(htmlText) {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(htmlText, 'text/html');
+                  const articles = doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common');
+                  
+                  const posts = [];
+                  const maxCount = Math.min(articles.length, 2); // 각 카테고리당 최신 글 2개
+
+                  for (let i = 0; i < maxCount; i++) {
+                    const parsed = parseArticleElement(articles[i]);
+                    if (!parsed.category) parsed.category = cat.name;
+                    posts.push(parsed);
+                  }
+
+                  return {
+                    category: cat,
+                    posts: posts
+                  };
+                })
+                .catch(function(err) {
+                  console.warn('[Category Loader] Error fetching ' + cat.name, err);
+                  return { category: cat, posts: [] };
+                });
+            });
+
+            Promise.all(fetchPromises).then(function(results) {
+              categorySection.innerHTML = '';
+              let totalRendered = 0;
+
+              results.forEach(function(res) {
+                if (!res.posts || res.posts.length === 0) return;
+
+                totalRendered++;
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'area-cover area-cover-grid2';
+
+                let headerHtml = '<div class="box-cover-title">';
+                headerHtml += '<h2 class="title-cover"><a href="' + res.category.url + '">' + escapeHtml(res.category.name) + '</a></h2>';
+                headerHtml += '<a href="' + res.category.url + '" class="link-title">더보기</a>';
+                headerHtml += '</div>';
+
+                let listHtml = '<div class="box-article box-article-grid2">';
+                res.posts.forEach(function(post) {
+                  listHtml += '<article class="article-type-common article-type-grid2">';
+                  listHtml += '  <a href="' + post.url + '" class="link-article link-thumb">';
+                  listHtml += '    <p class="thumbnail"' + (post.thumbStyle ? ' style="' + post.thumbStyle.replace(/"/g, '&quot;') + '"' : '') + '></p>';
+                  listHtml += '  </a>';
+                  listHtml += '  <div class="article-content">';
+                  listHtml += '    <a href="' + post.url + '" class="link-article link-text">';
+                  listHtml += '      <strong class="title">' + escapeHtml(post.title) + '</strong>';
+                  if (post.summary) {
+                    listHtml += '      <p class="summary">' + escapeHtml(post.summary) + '</p>';
+                  }
+                  listHtml += '    </a>';
+                  listHtml += '    <div class="box-meta">';
+                  listHtml += '      <a href="' + res.category.url + '" class="link-category">' + escapeHtml(post.category || res.category.name) + '</a>';
+                  if (post.date) {
+                    listHtml += '      <span class="date">' + escapeHtml(post.date) + '</span>';
+                  }
+                  if (post.reply) {
+                    listHtml += '      <span class="reply">' + escapeHtml(post.reply) + '</span>';
+                  }
+                  listHtml += '    </div>';
+                  listHtml += '  </div>';
+                  listHtml += '</article>';
+                });
+                listHtml += '</div>';
+
+                sectionDiv.innerHTML = headerHtml + listHtml;
+                categorySection.appendChild(sectionDiv);
+              });
+
+              if (totalRendered === 0 && !headlineSection) {
+                if (areaView) areaView.style.display = '';
+                categorySection.style.display = 'none';
+              }
+            });
           }
-        });
+        }
       }
 
       function escapeHtml(text) {
