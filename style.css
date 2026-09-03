@@ -5023,7 +5023,7 @@ hr[data-ke-style='style8'],
   }
 
   /* ========================================================
-     [모바일 전용: 767px 이하] 글 목록: 텍스트 좌측 확장 + 썸네일 우측 밀착
+     [모바일 전용: 767px 이하] 글 목록: 카드 형태 감싸기 + 가로 레이아웃(텍스트 좌 + 썸네일 우) 유지
      ======================================================== */
   @media screen and (max-width: 767px) {
     .article-type-common,
@@ -5037,26 +5037,30 @@ hr[data-ke-style='style8'],
       display: flex !important;
       flex-direction: row-reverse !important;
       justify-content: space-between !important;
-      align-items: center !important;
+      align-items: stretch !important;
       width: 100% !important;
       max-width: 100% !important;
-      margin: 0 0 18px 0 !important;
-      padding-bottom: 18px !important;
-      padding-top: 18px !important;
-      border-bottom: 1px solid #f0f0f0 !important;
+      margin: 0 0 14px 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+      border: 1px solid #EAEAEA !important;
+      border-radius: 12px !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
       box-sizing: border-box !important;
+      overflow: hidden !important;
     }
 
-    /* 썸네일을 감싸는 직계 a 태그: 우측 고정 크기 유지 */
+    /* 썸네일을 감싸는 직계 a 태그: 우측 끝에 완전히 밀착 */
     .article-type-common > a.link-article,
     .article-type-poster > a.link-article,
     .article-type-crop > a.link-article,
     .article-type-resize > a.link-article,
     .article-type-thumbnail > a.link-article {
-      display: block !important;
-      flex: 0 0 auto !important;
-      width: auto !important;
-      max-width: none !important;
+      display: flex !important;
+      align-self: stretch !important;
+      flex: 0 0 115px !important;
+      width: 115px !important;
+      max-width: 115px !important;
       margin: 0 !important;
       padding: 0 !important;
     }
@@ -5068,14 +5072,14 @@ hr[data-ke-style='style8'],
     .article-type-thumbnail .thumbnail,
     .article-type-common .thumbnail {
       display: block !important;
-      width: 110px !important;
-      min-width: 110px !important;
-      max-width: 110px !important;
-      height: 110px !important;
-      min-height: 110px !important;
-      margin: 0 0 0 16px !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      margin: 0 !important;
       padding: 0 !important;
-      border-radius: 10px !important;
+      border-radius: 0 !important;
       flex-shrink: 0 !important;
       background-size: cover !important;
       background-position: 50% 50% !important;
@@ -5099,7 +5103,7 @@ hr[data-ke-style='style8'],
       display: none !important;
     }
 
-    /* 좌측 텍스트 영역: 가로 공간 100% 확장 */
+    /* 좌측 텍스트 영역: 카드 내부 여백 제공 */
     .article-type-common > .article-content,
     .article-type-crop .article-content,
     .article-type-resize .article-content,
@@ -5112,9 +5116,11 @@ hr[data-ke-style='style8'],
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
-      padding: 0 !important;
+      padding: 14px 12px 14px 14px !important;
       margin: 0 !important;
-      display: block !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
     }
 
     .article-content > a.link-article {
@@ -5174,8 +5180,15 @@ hr[data-ke-style='style8'],
     }
 
     .article-type-common .link-category,
+    .article-content .link-category {
+      display: inline-block !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #F05A3C !important;
+      margin: 0 !important;
+    }
+
     .article-type-common .date,
-    .article-content .link-category,
     .article-content .date {
       display: inline-block !important;
       font-size: 12px !important;
