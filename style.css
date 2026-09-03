@@ -4956,10 +4956,41 @@ hr[data-ke-style='style8'],
     display: none !important;
   }
 
-  /* 모바일 메인 배너 높이 (230px) */
+  /* 모바일 메인 배너 높이 50% 축소 (260px/230px -> 130px) */
   .header .area-promotion,
   .header .area-promotion.height400 {
-    height: 230px !important;
+    height: 130px !important;
+  }
+  .area-promotion .inner-promotion {
+    padding: 0 16px !important;
+  }
+  .area-promotion .inner-promotion .box-promotion {
+    bottom: 16px !important;
+  }
+  .area-promotion .inner-promotion strong {
+    font-size: 20px !important;
+    line-height: 24px !important;
+  }
+
+  /* 모바일 카테고리 배너 높이 50% 축소 (260px -> 130px) */
+  #tt-body-category.use-category-banner #container {
+    margin-top: 130px !important;
+  }
+  .use-category-banner .category-banner-wrp {
+    height: 130px !important;
+    top: -130px !important;
+  }
+  .use-category-banner .category-banner {
+    height: 130px !important;
+  }
+  .use-category-banner .category-banner .category-banner-inner {
+    padding: 0 16px !important;
+    height: 100% !important;
+  }
+  .use-category-banner .category-banner .category-description-box strong {
+    font-size: 24px !important;
+    width: auto !important;
+    line-height: 1.2 !important;
   }
 
   /* 2. 슬라이드 서랍 메뉴 & 닫기(X) 버튼 */
@@ -5061,162 +5092,394 @@ hr[data-ke-style='style8'],
     display: block !important;
   }
 
-  /* 3. 모바일/태블릿 글 목록: 텍스트 좌측 확장 + 썸네일 우측 밀착 */
-  .article-type-common,
-  .box-cover-poster .article-type-poster,
-  .article-type-crop,
-  .article-type-resize,
-  .article-type-poster,
-  .article-type-,
-  .article-type-thumbnail,
-  .article-type-text {
-    display: flex !important;
-    flex-direction: row-reverse !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 0 18px 0 !important;
-    padding-bottom: 18px !important;
-    padding-top: 18px !important;
-    border-bottom: 1px solid #f0f0f0 !important;
-    box-sizing: border-box !important;
+  /* ========================================================
+     [모바일 전용: 767px 이하] 글 목록: 텍스트 좌측 확장 + 썸네일 우측 밀착
+     ======================================================== */
+  @media screen and (max-width: 767px) {
+    .article-type-common,
+    .box-cover-poster .article-type-poster,
+    .article-type-crop,
+    .article-type-resize,
+    .article-type-poster,
+    .article-type-,
+    .article-type-thumbnail,
+    .article-type-text {
+      display: flex !important;
+      flex-direction: row-reverse !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 0 18px 0 !important;
+      padding-bottom: 18px !important;
+      padding-top: 18px !important;
+      border-bottom: 1px solid #f0f0f0 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* 썸네일을 감싸는 직계 a 태그: 우측 고정 크기 유지 */
+    .article-type-common > a.link-article,
+    .article-type-poster > a.link-article,
+    .article-type-crop > a.link-article,
+    .article-type-resize > a.link-article,
+    .article-type-thumbnail > a.link-article {
+      display: block !important;
+      flex: 0 0 auto !important;
+      width: auto !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .article-type-crop .thumbnail,
+    .article-type-resize .thumbnail,
+    .article-type-poster .thumbnail,
+    .article-type- .thumbnail,
+    .article-type-thumbnail .thumbnail,
+    .article-type-common .thumbnail {
+      display: block !important;
+      width: 110px !important;
+      min-width: 110px !important;
+      max-width: 110px !important;
+      height: 110px !important;
+      min-height: 110px !important;
+      margin: 0 0 0 16px !important;
+      padding: 0 !important;
+      border-radius: 10px !important;
+      flex-shrink: 0 !important;
+      background-size: cover !important;
+      background-position: 50% 50% !important;
+      background-repeat: no-repeat !important;
+      background-color: #f5f5f5 !important;
+      overflow: hidden !important;
+    }
+
+    .article-type-poster .thumbnail:before {
+      display: none !important;
+    }
+
+    .article-type-crop .thumbnail img,
+    .article-type-resize .thumbnail img,
+    .article-type-poster .thumbnail img,
+    .article-type- .thumbnail img,
+    .article-type-thumbnail .thumbnail img,
+    .article-type-common .thumbnail img,
+    .thumbnail img,
+    .img-thumbnail {
+      display: none !important;
+    }
+
+    /* 좌측 텍스트 영역: 가로 공간 100% 확장 */
+    .article-type-common > .article-content,
+    .article-type-crop .article-content,
+    .article-type-resize .article-content,
+    .article-type-poster .article-content,
+    .article-type- .article-content,
+    .article-type-thumbnail .article-content,
+    .article-type-text .article-content,
+    .article-content {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+
+    .article-content > a.link-article {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      text-decoration: none !important;
+    }
+
+    .article-type-common .title,
+    .article-type-poster .title,
+    .article-type-thumbnail .title,
+    .article-content .title {
+      width: 100% !important;
+      max-width: 100% !important;
+      font-size: 15.5px !important;
+      font-weight: 700 !important;
+      line-height: 1.45 !important;
+      margin: 0 0 6px 0 !important;
+      max-height: none !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+    }
+
+    .article-type-common .summary,
+    .article-type-poster .summary,
+    .article-type- .summary,
+    .article-type-thumbnail .summary,
+    .article-content .summary {
+      width: 100% !important;
+      max-width: 100% !important;
+      font-size: 13px !important;
+      color: #777 !important;
+      line-height: 1.45 !important;
+      margin: 0 0 8px 0 !important;
+      max-height: none !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+      word-break: break-all !important;
+    }
+
+    .article-type-common .box-meta,
+    .article-content .box-meta {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 8px !important;
+    }
+
+    .article-type-common .link-category,
+    .article-type-common .date,
+    .article-content .link-category,
+    .article-content .date {
+      display: inline-block !important;
+      font-size: 12px !important;
+      color: #999 !important;
+      margin: 0 !important;
+    }
   }
 
-  /* 썸네일을 감싸는 직계 a 태그: 우측 고정 크기 유지 */
-  .article-type-common > a.link-article,
-  .article-type-poster > a.link-article,
-  .article-type-crop > a.link-article,
-  .article-type-resize > a.link-article,
-  .article-type-thumbnail > a.link-article {
-    display: block !important;
-    flex: 0 0 auto !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+  /* ========================================================
+     [태블릿 전용: 768px ~ 1060px] 카테고리 글 목록 3열 카드 그리드
+     ======================================================== */
+  @media screen and (min-width: 768px) and (max-width: 1060px) {
+    /* 1. 카테고리 글 목록 컨테이너: 3열 Grid */
+    .box-article,
+    .box-cover-poster,
+    .area-common.area-list {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 20px 16px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
 
-  .article-type-crop .thumbnail,
-  .article-type-resize .thumbnail,
-  .article-type-poster .thumbnail,
-  .article-type- .thumbnail,
-  .article-type-thumbnail .thumbnail,
-  .article-type-common .thumbnail {
-    display: block !important;
-    width: 110px !important;
-    min-width: 110px !important;
-    max-width: 110px !important;
-    height: 110px !important;
-    min-height: 110px !important;
-    margin: 0 0 0 16px !important;
-    padding: 0 !important;
-    border-radius: 10px !important;
-    flex-shrink: 0 !important;
-    background-size: cover !important;
-    background-position: 50% 50% !important;
-    background-repeat: no-repeat !important;
-    background-color: #f5f5f5 !important;
-    overflow: hidden !important;
-  }
+    .area-common.area-list .category-banner-wrp,
+    .area-common.area-list .title-search {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+    }
 
-  .article-type-poster .thumbnail:before {
-    display: none !important;
-  }
+    /* 2. 1번째 글: 상단 전체 너비 가로 하이라이트 (PC와 동일 유지) */
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type,
+    .area-common .article-type-poster:first-of-type,
+    .box-cover-poster article:first-of-type,
+    .box-article:not(.box-article-grid2) article:not(.article-type-grid2):first-of-type {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      margin-right: 0 !important;
+      margin-bottom: 28px !important;
+      padding-bottom: 24px !important;
+      border-bottom: 1px solid #ededed !important;
+      box-sizing: border-box !important;
+    }
 
-  .article-type-crop .thumbnail img,
-  .article-type-resize .thumbnail img,
-  .article-type-poster .thumbnail img,
-  .article-type- .thumbnail img,
-  .article-type-thumbnail .thumbnail img,
-  .article-type-common .thumbnail img,
-  .thumbnail img,
-  .img-thumbnail {
-    display: none !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type > .link-article:first-child,
+    .area-common .article-type-poster:first-of-type > .link-article:first-child,
+    .box-cover-poster article:first-of-type > .link-article:first-child,
+    .box-article:not(.box-article-grid2) article:not(.article-type-grid2):first-of-type > .link-article:first-child {
+      display: block !important;
+      width: 280px !important;
+      min-width: 280px !important;
+      margin-right: 24px !important;
+      flex-shrink: 0 !important;
+    }
 
-  /* 좌측 텍스트 영역: 가로 공간 100% 확장 */
-  .article-type-common > .article-content,
-  .article-type-crop .article-content,
-  .article-type-resize .article-content,
-  .article-type-poster .article-content,
-  .article-type- .article-content,
-  .article-type-thumbnail .article-content,
-  .article-type-text .article-content,
-  .article-content {
-    flex: 1 1 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .thumbnail,
+    .area-common .article-type-poster:first-of-type .thumbnail,
+    .box-cover-poster article:first-of-type .thumbnail,
+    .box-article:not(.box-article-grid2) article:not(.article-type-grid2):first-of-type .thumbnail {
+      display: block !important;
+      width: 100% !important;
+      height: 210px !important;
+      padding-top: 0 !important;
+      margin: 0 !important;
+      border-radius: 10px !important;
+      background-size: cover !important;
+      background-position: center center !important;
+      overflow: hidden !important;
+    }
 
-  .article-content > a.link-article {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    text-decoration: none !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .article-content,
+    .area-common .article-type-poster:first-of-type .article-content {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      text-align: left !important;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
 
-  .article-type-common .title,
-  .article-type-poster .title,
-  .article-type-thumbnail .title,
-  .article-content .title {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 15.5px !important;
-    font-weight: 700 !important;
-    line-height: 1.45 !important;
-    margin: 0 0 6px 0 !important;
-    max-height: none !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    white-space: normal !important;
-    word-break: break-all !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .title,
+    .area-common .article-type-poster:first-of-type .title {
+      width: 100% !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 1.4 !important;
+      color: #222 !important;
+      margin: 0 0 10px 0 !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+    }
 
-  .article-type-common .summary,
-  .article-type-poster .summary,
-  .article-type- .summary,
-  .article-type-thumbnail .summary,
-  .article-content .summary {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 13px !important;
-    color: #777 !important;
-    line-height: 1.45 !important;
-    margin: 0 0 8px 0 !important;
-    max-height: none !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    word-break: break-all !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .summary,
+    .area-common .article-type-poster:first-of-type .summary {
+      display: -webkit-box !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #666 !important;
+      margin: 0 0 14px 0 !important;
+      -webkit-line-clamp: 4 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
 
-  .article-type-common .box-meta,
-  .article-content .box-meta {
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: wrap !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 8px !important;
-  }
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .box-meta,
+    .area-common .article-type-poster:first-of-type .box-meta {
+      display: flex !important;
+      align-items: center !important;
+    }
 
-  .article-type-common .link-category,
-  .article-type-common .date,
-  .article-content .link-category,
-  .article-content .date {
-    display: inline-block !important;
-    font-size: 12px !important;
-    color: #999 !important;
-    margin: 0 !important;
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .link-category,
+    .area-common .article-type-poster:first-of-type .link-category {
+      display: inline-block !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      color: #F05A3C !important;
+      margin-right: 12px !important;
+    }
+
+    .area-common .article-type-common:not(.article-type-grid2):first-of-type .date,
+    .area-common .article-type-poster:first-of-type .date {
+      display: inline-block !important;
+      font-size: 13px !important;
+      color: #999 !important;
+    }
+
+    /* 3. 2번째 글부터 3열 독립 박스형 카드 */
+    .article-type-poster:not(:first-of-type),
+    .box-article .article-type-common:not(:first-of-type),
+    .area-common .article-type-common:not(:first-of-type) {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      background: #ffffff !important;
+      border: 1px solid #EAEAEA !important;
+      border-radius: 8px !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+
+    .article-type-poster:not(:first-of-type) > .link-article:first-child,
+    .article-type-poster:not(:first-of-type) > a:first-child,
+    .area-common .article-type-common:not(:first-of-type) > .link-article:first-child,
+    .area-common .article-type-common:not(:first-of-type) > a:first-child {
+      display: block !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      background-color: #f7f7f7 !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .thumbnail,
+    .area-common .article-type-common:not(:first-of-type) .thumbnail {
+      display: block !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: 0 !important;
+      padding-top: 75% !important;
+      aspect-ratio: 4 / 3 !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background-size: cover !important;
+      background-position: center center !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .thumbnail:before,
+    .area-common .article-type-common:not(:first-of-type) .thumbnail:before {
+      display: none !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .article-content,
+    .area-common .article-type-common:not(:first-of-type) .article-content {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 80px !important;
+      padding: 12px 14px 14px 14px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .title,
+    .area-common .article-type-common:not(:first-of-type) .title {
+      font-size: 14.5px !important;
+      font-weight: 700 !important;
+      line-height: 1.4 !important;
+      color: #222 !important;
+      margin: 0 0 6px 0 !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .summary,
+    .area-common .article-type-common:not(:first-of-type) .summary,
+    .article-type-poster:not(:first-of-type) .link-category,
+    .area-common .article-type-common:not(:first-of-type) .link-category,
+    .article-type-poster:not(:first-of-type) .reply,
+    .area-common .article-type-common:not(:first-of-type) .reply {
+      display: none !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .box-meta,
+    .area-common .article-type-common:not(:first-of-type) .box-meta {
+      margin-top: auto !important;
+      padding-top: 4px !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .date,
+    .area-common .article-type-common:not(:first-of-type) .date {
+      font-size: 12px !important;
+      color: #999 !important;
+    }
   }
 
   /* 4. 하단 위젯 모바일 상하 전환 (50% 슬림화) */

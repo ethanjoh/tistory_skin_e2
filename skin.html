@@ -172,7 +172,7 @@
                       data-tiara-plink="[##_list_rep_link_##]"
                       data-tiara-id="[##_list_rep_link_##]"
                     >
-                      <p class="thumbnail" <s_list_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_list_rep_thumbnail_raw_url_##]')" </s_list_rep_thumbnail>></p>
+                      <p class="thumbnail" <s_list_rep_thumbnail> has-thumbnail="1" style="background-image:url('[##_list_rep_thumbnail_url_##]')" </s_list_rep_thumbnail>></p>
                     </a>
 
                     <div class="article-content">
@@ -1659,6 +1659,131 @@
           .replace(/'/g, "&#039;");
       }
     });
+  </script>
+
+  <!-- 카테고리/검색 목록 더보기(AJAX) 클릭 시 썸네일 500 에러 방지 및 안전 복구 스크립트 -->
+  <script>
+    (function() {
+      // 1. 단일 아티클 요소에 대한 안전한 썸네일 복구/보정 함수
+      function fixArticleThumbnail(article) {
+        if (!article) return;
+
+        var thumbEl = article.querySelector('.thumbnail');
+        if (!thumbEl) return;
+
+        var currentBg = thumbEl.style.backgroundImage || (window.getComputedStyle ? window.getComputedStyle(thumbEl).backgroundImage : '');
+        var linkEl = article.querySelector('a.link-article') || article.querySelector('a');
+        var tiaraImage = linkEl ? linkEl.getAttribute('data-tiara-image') : '';
+
+        // 현재 background-image에서 깨끗한 URL 추출
+        var cleanUrl = '';
+        if (currentBg && currentBg !== 'none') {
+          cleanUrl = currentBg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '').trim();
+        }
+
+        // 500 에러를 유발하는 중복/미인코딩 daumcdn fname URL이거나, 단독 접근 불가능한 raw kakaocdn URL 감지
+        var isBrokenDaumFname = cleanUrl.indexOf('fname=http') !== -1 && cleanUrl.indexOf('fname=https%3A') === -1;
+        var isRawKakaoDna = cleanUrl.indexOf('blog.kakaocdn.net/dna/') !== -1 && cleanUrl.indexOf('daumcdn.net/thumb/') === -1;
+        var isInvalidUrl = !cleanUrl || cleanUrl === 'none' || isBrokenDaumFname || isRawKakaoDna;
+
+        if (isInvalidUrl) {
+          if (tiaraImage && tiaraImage.indexOf('no-image') === -1 && tiaraImage.indexOf('icon-no-img') === -1) {
+            // 1순위: 티스토리가 생성하여 보증하는 공식 daumcdn 유효 썸네일 주소
+            thumbEl.style.backgroundImage = 'url("' + tiaraImage + '")';
+            thumbEl.setAttribute('has-thumbnail', '1');
+          } else if (cleanUrl && isRawKakaoDna) {
+            // 2순위: 파라미터가 포함된 raw 카카오 이미지인 경우 encodeURIComponent 처리하여 daumcdn 프록시 적용
+            var safeUrl = 'https://img1.daumcdn.net/thumb/S400x300.fwebp.q85/?scode=mtistory2&fname=' + encodeURIComponent(cleanUrl);
+            thumbEl.style.backgroundImage = 'url("' + safeUrl + '")';
+            thumbEl.setAttribute('has-thumbnail', '1');
+          }
+        } else if (cleanUrl && cleanUrl.indexOf('daumcdn.net/thumb/') !== -1) {
+          thumbEl.setAttribute('has-thumbnail', '1');
+        }
+
+        // common.js의 결함 있는 setThumbnail()이 이 글을 잘못 변형하지 않도록 checked-item 클래스 마킹
+        article.classList.add('checked-item');
+      }
+
+      // 2. 전체 아티클 썸네일 검사 및 복구 실행
+      function fixAllThumbnails() {
+        var articles = document.querySelectorAll('.area-common .article-type-common, .area-main article, article.article-type-common, article.article-type-poster');
+        for (var i = 0; i < articles.length; i++) {
+          fixArticleThumbnail(articles[i]);
+        }
+      }
+
+      // 3. common.js의 전역 setThumbnail 함수 오버라이드
+      // (더보기 AJAX 호출 완료 후 setThumbnail()이 실행될 때 깨진 URL 생성 방지 및 정상 복구)
+      var originalSetThumbnail = window.setThumbnail;
+      window.setThumbnail = function() {
+        fixAllThumbnails();
+        try {
+          if (typeof originalSetThumbnail === 'function') {
+            originalSetThumbnail.apply(this, arguments);
+          }
+        } catch (e) {}
+        fixAllThumbnails();
+      };
+
+      // 4. MutationObserver를 통해 DOM에 새 아티클이 추가되는 즉시 실시간 복구
+      function initThumbnailObserver() {
+        var targetContainer = document.querySelector('.area-main, .area-list, main.main') || document.body;
+        if (!targetContainer || !window.MutationObserver) return;
+
+        var observer = new MutationObserver(function(mutations) {
+          var needFix = false;
+          mutations.forEach(function(mutation) {
+            if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+              for (var i = 0; i < mutation.addedNodes.length; i++) {
+                var node = mutation.addedNodes[i];
+                if (node.nodeType === 1) {
+                  if (node.classList && (node.classList.contains('article-type-common') || node.tagName === 'ARTICLE')) {
+                    fixArticleThumbnail(node);
+                    needFix = true;
+                  } else if (node.querySelectorAll) {
+                    var childArticles = node.querySelectorAll('.article-type-common, article');
+                    if (childArticles.length > 0) {
+                      for (var j = 0; j < childArticles.length; j++) {
+                        fixArticleThumbnail(childArticles[j]);
+                      }
+                      needFix = true;
+                    }
+                  }
+                }
+              }
+            }
+          });
+          if (needFix) {
+            setTimeout(fixAllThumbnails, 80);
+            setTimeout(fixAllThumbnails, 300);
+          }
+        });
+
+        observer.observe(targetContainer, { childList: true, subtree: true });
+      }
+
+      // 5. '더보기' 버튼 클릭 이벤트 보조 리스너
+      document.addEventListener('click', function(e) {
+        var target = e.target;
+        if (target && (target.classList.contains('paging-more') || target.closest('.paging-more, .area-paging-more'))) {
+          setTimeout(fixAllThumbnails, 200);
+          setTimeout(fixAllThumbnails, 600);
+          setTimeout(fixAllThumbnails, 1200);
+        }
+      });
+
+      // 6. 초기 로드 시점 실행
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          fixAllThumbnails();
+          initThumbnailObserver();
+        });
+      } else {
+        fixAllThumbnails();
+        initThumbnailObserver();
+      }
+    })();
   </script>
 </body>
 </html>
