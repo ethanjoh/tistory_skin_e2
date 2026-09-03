@@ -10,6 +10,8 @@
 
 ![티스토리 스킨 배너](tistory_skin.jpg)
 
+---
+
 ![스킨 스크린샷](screenshot.jpg)
 
 ---
