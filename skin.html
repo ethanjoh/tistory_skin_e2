@@ -247,9 +247,30 @@
                     </div>
                   </div>
 
-                  <!-- 에디터 영역 -->
-                  <div class="article-view" id="article-view">
-                    [##_article_rep_desc_##]
+                  <!-- 본문 및 우측 카테고리 랭킹 10개 리스트 래퍼 -->
+                  <div class="article-view-wrap">
+                    <div class="article-view-main">
+                      <!-- 에디터 영역 -->
+                      <div class="article-view" id="article-view">
+                        [##_article_rep_desc_##]
+                      </div>
+                    </div>
+
+                    <!-- 본문 우측 해당 카테고리 최신글 10개 사이드 위젯 -->
+                    <aside class="article-view-sidebar">
+                      <div class="category-rank-widget" id="category-rank-widget">
+                        <div class="category-rank-header">
+                          <h3 class="category-rank-title">
+                            <span class="category-rank-cat">[##_article_rep_category_##]</span> 최신글
+                          </h3>
+                        </div>
+                        <ol class="category-rank-list" id="category-rank-list">
+                          <li class="rank-item rank-loading">
+                            <span class="rank-loading-text">최신글을 불러오는 중입니다...</span>
+                          </li>
+                        </ol>
+                      </div>
+                    </aside>
                   </div>
 
                   <!-- article-footer -->
@@ -262,23 +283,6 @@
                       </div>
                       <!-- // area_tag -->
                     </s_tag_label>
-
-                    <div class="article-page">
-                      <h3 class="title-footer">'[##_article_rep_category_##]'의 다른글</h3>
-                      <ul>
-                        <li>
-                          <s_article_prev>
-                            <a href="[##_article_prev_link_##]"><span>이전글</span><strong>[##_article_prev_title_##]</strong></a>
-                          </s_article_prev>
-                        </li>
-                        <li><span>현재글</span><strong>[##_article_rep_title_##]</strong></li>
-                        <li>
-                          <s_article_next>
-                            <a href="[##_article_next_link_##]"><span>다음글</span><strong>[##_article_next_title_##]</strong></a>
-                          </s_article_next>
-                        </li>
-                      </ul>
-                    </div>
 
                     <s_article_related>
                       <!-- article-related -->
@@ -1546,6 +1550,113 @@
             });
           }
         }
+      }
+
+      // 3. 포스팅 상세 페이지 본문 우측 해당 카테고리 최신글 10개 랭킹 비동기 로더
+      const rankListContainer = document.getElementById('category-rank-list');
+      if (rankListContainer) {
+        const postCategoryEl = document.querySelector('.article-header .box-meta .category, .area-view .category, .category-rank-cat');
+        let rawCatName = postCategoryEl ? postCategoryEl.textContent.trim() : '';
+        
+        let categoryUrl = '';
+        if (rawCatName && rawCatName !== '전체' && rawCatName !== '분류없음' && rawCatName !== '카테고리 없음') {
+          // GNB / 사이드바 메뉴에서 일치하는 카테고리 URL 검색
+          const allCatLinks = Array.from(document.querySelectorAll('.area-gnb a, .box-category a, .tt_category a'));
+          for (let link of allCatLinks) {
+            const clone = link.cloneNode(true);
+            const cnt = clone.querySelector('.c_cnt');
+            if (cnt) cnt.remove();
+            const text = clone.textContent.trim();
+            if (text && (text === rawCatName || rawCatName.endsWith('/' + text) || rawCatName.startsWith(text))) {
+              categoryUrl = link.getAttribute('href');
+              if (text === rawCatName) break;
+            }
+          }
+          if (!categoryUrl || categoryUrl === '#') {
+            categoryUrl = '/category/' + encodeURIComponent(rawCatName);
+          }
+        } else {
+          categoryUrl = '/category';
+        }
+
+        function renderRankItems(posts) {
+          if (!posts || posts.length === 0) {
+            rankListContainer.innerHTML = '<li class="rank-item rank-empty"><span>등록된 글이 없습니다.</span></li>';
+            return;
+          }
+          let html = '';
+          posts.forEach(function(post, idx) {
+            const rankNum = idx + 1;
+            const topRankClass = rankNum <= 3 ? ' top-rank' : '';
+            const currentClass = post.isCurrent ? ' is-current' : '';
+            html += '<li class="rank-item' + topRankClass + currentClass + '">';
+            html += '  <a href="' + post.url + '" class="rank-link">';
+            html += '    <span class="rank-num">' + rankNum + '</span>';
+            html += '    <span class="rank-title">' + escapeHtml(post.title) + '</span>';
+            html += '  </a>';
+            html += '</li>';
+          });
+          rankListContainer.innerHTML = html;
+        }
+
+        function extractArticles(doc) {
+          const articleEls = doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common, article.article-type-common, article');
+          const posts = [];
+          const currentPath = window.location.pathname;
+
+          articleEls.forEach(function(art) {
+            if (posts.length >= 10) return;
+            const linkEl = art.querySelector('a.link-article') || art.querySelector('a');
+            const titleEl = art.querySelector('.title, .title-article, strong.title, strong, h2, h3');
+            if (linkEl && titleEl) {
+              const href = linkEl.getAttribute('href');
+              const title = titleEl.textContent.trim();
+              if (href && title && !posts.some(function(p) { return p.url === href; })) {
+                posts.push({
+                  url: href,
+                  title: title,
+                  isCurrent: (href === currentPath || currentPath.endsWith(href))
+                });
+              }
+            }
+          });
+          return posts;
+        }
+
+        fetch(categoryUrl)
+          .then(function(res) {
+            if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+            return res.text();
+          })
+          .then(function(htmlText) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            const posts = extractArticles(doc);
+            if (posts.length > 0) {
+              renderRankItems(posts);
+            } else if (categoryUrl !== '/category') {
+              return fetch('/category')
+                .then(function(r) { return r.text(); })
+                .then(function(txt) {
+                  const d = new DOMParser().parseFromString(txt, 'text/html');
+                  renderRankItems(extractArticles(d));
+                });
+            } else {
+              renderRankItems([]);
+            }
+          })
+          .catch(function(err) {
+            console.warn('[Category Rank Loader] Fetch error:', err);
+            fetch('/category')
+              .then(function(r) { return r.text(); })
+              .then(function(txt) {
+                const d = new DOMParser().parseFromString(txt, 'text/html');
+                renderRankItems(extractArticles(d));
+              })
+              .catch(function() {
+                renderRankItems([]);
+              });
+          });
       }
 
       function escapeHtml(text) {
