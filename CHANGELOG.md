@@ -2,6 +2,25 @@
 
 # CHANGELOG
 
+## [2026-09-05]
+
+### 변경 목적
+- 서브카테고리 및 글 목록의 2번째 이후 카드 아이템 하단 메타 영역에서 날짜 옆에 카테고리명을 오렌지 색상으로 노출하여 시인성 및 카테고리 인지성 개선
+
+### 주요 결정 사항
+1. **2번째 이후 카드 카테고리명 표시 및 스타일링 (`style.css`)**:
+   - PC 뷰 및 반응형 미디어 쿼리(1060px 이하) 내 `.article-type-poster:not(:first-of-type) .link-category`, `.area-common .article-type-common:not(:first-of-type) .link-category`의 숨김 속성(`display: none !important;`)을 해제.
+   - 테마 대표 오렌지 색상(`color: #F05A3C !important;`), 글자 두께(`font-weight: 600 !important;`), 폰트 크기(`12px !important;`), 날짜와의 간격(`margin-right: 12px !important;`)을 적용하여 깔끔하게 날짜 좌측에 배치.
+
+### 수정한 파일
+- `style.css`: 2번째 이후 카드 아이템의 카테고리명 표시 및 오렌지 색상 스타일 적용
+- `CHANGELOG.md`: 작업 내역 기록
+
+### 테스트 결과
+- 2번째 이후 카드 아이템에서도 날짜 옆에 카테고리명이 선명한 오렌지 포인트 컬러로 정상 표시되고, 기존 첫 번째 강조글 및 카드 레이아웃 정렬이 깨짐 없이 유지됨을 확인
+
+---
+
 ## [2026-09-04]
 
 ### 변경 목적

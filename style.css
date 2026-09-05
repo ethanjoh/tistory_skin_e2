@@ -4818,11 +4818,19 @@ hr[data-ke-style='style8'],
     padding: 0 !important;
   }
 
-  .article-type-poster:not(:first-of-type) .link-category,
   .article-type-poster:not(:first-of-type) .reply,
-  .area-common .article-type-common:not(:first-of-type) .link-category,
   .area-common .article-type-common:not(:first-of-type) .reply {
     display: none !important;
+  }
+
+  .article-type-poster:not(:first-of-type) .link-category,
+  .area-common .article-type-common:not(:first-of-type) .link-category {
+    display: inline-block !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #F05A3C !important;
+    margin-right: 12px !important;
+    text-decoration: none !important;
   }
 
   .article-type-poster:not(:first-of-type) .date,
@@ -5405,11 +5413,19 @@ hr[data-ke-style='style8'],
 
     .article-type-poster:not(:first-of-type) .summary,
     .area-common .article-type-common:not(:first-of-type) .summary,
-    .article-type-poster:not(:first-of-type) .link-category,
-    .area-common .article-type-common:not(:first-of-type) .link-category,
     .article-type-poster:not(:first-of-type) .reply,
     .area-common .article-type-common:not(:first-of-type) .reply {
       display: none !important;
+    }
+
+    .article-type-poster:not(:first-of-type) .link-category,
+    .area-common .article-type-common:not(:first-of-type) .link-category {
+      display: inline-block !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #F05A3C !important;
+      margin-right: 12px !important;
+      text-decoration: none !important;
     }
 
     .article-type-poster:not(:first-of-type) .box-meta,
