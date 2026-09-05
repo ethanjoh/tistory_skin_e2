@@ -1077,39 +1077,169 @@
     </script>
   </s_article_rep>
 
-  <!-- 티스토리 마크다운 줄바꿈 깨짐 보정 Mermaid 스크립트 -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- 티스토리 Mermaid 다이어그램 렌더링 (지메일/모바일 인앱 브라우저 완벽 호환) -->
+  <style>
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      background: transparent !important;
+    }
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  </style>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // language-mermaid 코드 블록 검색
-      const elements = document.querySelectorAll('code.language-mermaid, pre.mermaid');
+    (function() {
+      // 1. Mermaid 라이브러리 비동기 로더 (중복 요청 방지 및 CDN 페일오버 지원)
+      var isLoading = false;
+      var callbacks = [];
+      function loadMermaid(callback) {
+        if (window.mermaid) {
+          callback(window.mermaid);
+          return;
+        }
+        callbacks.push(callback);
+        if (isLoading) return;
+        isLoading = true;
 
-      elements.forEach(function(el) {
-        let content = el.textContent.trim();
+        var cdns = [
+          'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js',
+          'https://unpkg.com/mermaid@10/dist/mermaid.min.js'
+        ];
 
-        // 앞뒤 큰따옴표 제거
-        if (content.startsWith('"') && content.endsWith('"')) {
-          content = content.slice(1, -1);
+        var index = 0;
+        function tryNextCdn() {
+          if (index >= cdns.length) {
+            isLoading = false;
+            console.error('Mermaid library load failed from all CDNs.');
+            return;
+          }
+          var s = document.createElement('script');
+          s.src = cdns[index++];
+          s.onload = function() {
+            if (window.mermaid) {
+              isLoading = false;
+              while (callbacks.length > 0) {
+                callbacks.shift()(window.mermaid);
+              }
+            } else {
+              tryNextCdn();
+            }
+          };
+          s.onerror = tryNextCdn;
+          document.head.appendChild(s);
         }
 
-        // 공백으로 붙어버린 노드/연결선 키워드 기준으로 줄바꿈 보정
-        content = content
-          .replace(/\s+(AY\[|YO\[|HI\[|YU\[|KU\[|UT\[|JU\[|classDef|class)/g, '\n$1')
-          .replace(/\s+([A-Z]{2}\s*(--|-->|<\-\->))/g, '\n$1');
+        tryNextCdn();
+      }
 
-        const div = document.createElement('div');
-        div.className = 'mermaid';
-        div.textContent = content;
+      // 2. DOM 내 Mermaid 코드 블록 변환 및 렌더링
+      function renderAllMermaids() {
+        var targets = [];
+        var seen = new Set();
 
-        // 기존 pre/code 태그를 새 div로 교체
-        const target = el.tagName.toLowerCase() === 'code' ? el.parentElement : el;
-        target.parentNode.insertBefore(div, target);
-        target.remove();
+        // (1) 명시적 언어 지정 선택자 검색
+        var explicitList = document.querySelectorAll(
+          'code.language-mermaid, pre.mermaid, [data-ke-language="mermaid"], pre.codeblock[data-ke-language="mermaid"]'
+        );
+        for (var i = 0; i < explicitList.length; i++) {
+          var el = explicitList[i];
+          var block = (el.tagName.toLowerCase() === 'code' && el.parentElement && el.parentElement.tagName.toLowerCase() === 'pre')
+            ? el.parentElement
+            : el;
+          if (!seen.has(block) && !block.getAttribute('data-mermaid-processed')) {
+            seen.add(block);
+            targets.push(block);
+          }
+        }
+
+        // (2) 구문 강조 플러그인 등으로 클래스가 변경되었을 경우를 대비한 다이어그램 키워드 감지 Fallback
+        var preList = document.querySelectorAll('#article-view pre, .article-view pre, .entry-content pre, article pre');
+        var keywordRegex = /^\s*(graph\b|flowchart\b|sequenceDiagram\b|classDiagram\b|stateDiagram\b|erDiagram\b|gantt\b|pie\b|gitGraph\b|journey\b|mindmap\b|timeline\b)/;
+        for (var j = 0; j < preList.length; j++) {
+          var p = preList[j];
+          if (!seen.has(p) && !p.getAttribute('data-mermaid-processed')) {
+            var rawText = (p.textContent || '').trim();
+            if (keywordRegex.test(rawText)) {
+              seen.add(p);
+              targets.push(p);
+            }
+          }
+        }
+
+        if (targets.length === 0) return;
+
+        var newDivs = [];
+        targets.forEach(function(target) {
+          target.setAttribute('data-mermaid-processed', 'true');
+
+          var content = target.textContent.trim();
+          if (content.startsWith('"') && content.endsWith('"')) {
+            content = content.slice(1, -1);
+          }
+
+          // 줄바꿈이 압축된 경우(3개 미만)에만 안전하게 복원 정규식 적용
+          var lineCount = (content.match(/\n/g) || []).length;
+          if (lineCount < 3) {
+            content = content
+              .replace(/\s+(classDef|class|subgraph|end)/g, '\n$1')
+              .replace(/\s+([A-Za-z0-9_-]+\[)/g, '\n$1')
+              .replace(/\s+([A-Za-z0-9_-]+\s*(--|-->|<\-\->|\.-|-\.))/g, '\n$1');
+          }
+
+          var div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = content;
+
+          target.parentNode.insertBefore(div, target);
+          target.remove();
+          newDivs.push(div);
+        });
+
+        if (newDivs.length === 0) return;
+
+        loadMermaid(function(m) {
+          try {
+            m.initialize({
+              startOnLoad: false,
+              theme: 'default',
+              securityLevel: 'loose',
+              flowchart: {
+                htmlLabels: false,
+                useMaxWidth: true
+              }
+            });
+            m.run({ nodes: newDivs });
+          } catch (err) {
+            console.warn('Mermaid rendering error:', err);
+          }
+        });
+      }
+
+      // 3. 다중 트리거 (DOMContentLoaded, load, setTimeout, 터치/스크롤 인터랙션)
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderAllMermaids);
+      } else {
+        renderAllMermaids();
+      }
+
+      window.addEventListener('load', function() {
+        setTimeout(renderAllMermaids, 100);
+        setTimeout(renderAllMermaids, 500);
       });
 
-      mermaid.initialize({ startOnLoad: false, theme: 'default' });
-      mermaid.run();
-    });
+      function interactionHandler() {
+        renderAllMermaids();
+        window.removeEventListener('scroll', interactionHandler);
+        window.removeEventListener('touchstart', interactionHandler);
+      }
+      window.addEventListener('scroll', interactionHandler, { passive: true });
+      window.addEventListener('touchstart', interactionHandler, { passive: true });
+    })();
   </script>
   <!-- 메가메뉴 서브메뉴 높이에 따른 자동 확장 스크립트 -->
   <script>
