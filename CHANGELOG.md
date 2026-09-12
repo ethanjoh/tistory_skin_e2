@@ -2,6 +2,24 @@
 
 # CHANGELOG
 
+## [2026-09-12] - 구글 사이트 인증(google-site-verification) 메타 태그 정리
+
+### 변경 목적
+- 불필요하거나 만료된 구글 서치 콘솔 소유권 확인용 메타 태그(`google-site-verification`) 정리
+
+### 주요 결정 사항
+1. **메타 태그 제거 (`skin.html`)**:
+   - `skin.html` 내 `<head>` 영역의 중복/미사용 `google-site-verification` 메타 태그 삭제
+
+### 수정한 파일
+- `skin.html`: 불필요한 구글 인증 메타 태그 삭제
+- `CHANGELOG.md`: 작업 내역 기록
+
+### 테스트 결과
+- 태그 제거 후 HTML 마크업 및 구문 이상 없음 확인
+
+---
+
 ## [2026-09-08] - Mermaid 다이어그램 폰트 및 박스 크기 과다 확대 문제 해결
 
 ### 변경 목적
