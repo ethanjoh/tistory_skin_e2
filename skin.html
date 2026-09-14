@@ -7,6 +7,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+  <meta name="google-site-verification" content="cHQMlKJv9xqLZo2Cyd3ljrHFx0u-oLT3Eant0_HnG74" />
+  <meta name="naver-site-verification" content="e0b5693bd068a39064df0c2d85179922083c3cd3" />
   <link rel="alternate" type="application/rss+xml" title="[##_title_##]" href="[##_rss_url_##]" />
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" />
   <link rel="stylesheet" href="./style.css" />
@@ -1264,9 +1266,194 @@
       updateMegaMenuHeight();
     });
   </script>
-  <!-- 메인 페이지 최신글 뉴스 헤드라인 & 카테고리별 2열 노출 스크립트 -->
+  <!-- 비공개 카테고리/글 동적 필터링: 카테고리명 하드코딩 없음 -->
+  <script>
+    (function() {
+      /* 티스토리 관리자 category.json의 실제 visibility를 우선 사용합니다. */
+      var privateNames = new Set();
+      var privateHrefs = new Set();
+      var privatePaths = new Set();
+
+      window.PRIVATE_CAT_NAMES = privateNames;
+      window.PRIVATE_CAT_HREFS = privateHrefs;
+      window.PRIVATE_CAT_PATHS = privatePaths;
+
+      function normalizeName(value) {
+        return String(value || '').replace(/\s+/g, '').trim().toLowerCase();
+      }
+
+      function normalizeHref(value) {
+        try { return decodeURIComponent(String(value || '')).toLowerCase(); }
+        catch (e) { return String(value || '').toLowerCase(); }
+      }
+
+      function addPrivateCategory(cat, parentNames) {
+        if (!cat) return;
+
+        var name = cat.name || cat.label || cat.title || '';
+        var rawVisibility = cat.visibility != null ? cat.visibility : cat.visibilityType;
+        var visibility = String(rawVisibility == null ? '' : rawVisibility).toUpperCase();
+        /* Tistory category.json 실측값: 공개=20, 보호=15, 비공개=0 */
+        var isPrivate = cat.isPrivate === true || cat.private === true ||
+          rawVisibility === 0 || visibility === '0' ||
+          visibility === 'PRIVATE' || visibility === 'HIDDEN' || visibility === 'SECRET';
+        var currentPath = parentNames.concat(name ? [String(name)] : []);
+
+        if (isPrivate) {
+          var n = normalizeName(name);
+          if (n) privateNames.add(n);
+          var path = currentPath.map(normalizeName).filter(Boolean).join('/');
+          if (path) privatePaths.add(path);
+        }
+
+        var children = cat.children || cat.childCategories || cat.subCategories || [];
+        if (Array.isArray(children)) {
+          children.forEach(function(child) { addPrivateCategory(child, currentPath); });
+        }
+      }
+
+      function collectPrivateCategories(payload) {
+        var roots = payload && (
+          payload.categories ||
+          payload.categoryTree ||
+          (payload.data && (payload.data.categories || payload.data.categoryTree))
+        );
+        if (!Array.isArray(roots)) return false;
+        roots.forEach(function(cat) { addPrivateCategory(cat, []); });
+        return true;
+      }
+
+      // 관리자 API를 사용할 수 없는 경우를 위한 보조 감지
+      function hasLockMarker(element) {
+        if (!element) return false;
+        var nodes = [element];
+        if (element.querySelectorAll) {
+          element.querySelectorAll('*').forEach(function(node) { nodes.push(node); });
+        }
+        for (var i = 0; i < nodes.length; i++) {
+          var node = nodes[i];
+          var attrs = [
+            node.getAttribute && node.getAttribute('src'),
+            node.getAttribute && node.getAttribute('alt'),
+            node.getAttribute && node.getAttribute('title'),
+            node.getAttribute && node.getAttribute('aria-label'),
+            node.getAttribute && node.getAttribute('data-icon'),
+            node.getAttribute && node.getAttribute('data-name'),
+            node.getAttribute && node.getAttribute('class')
+          ].filter(Boolean).join(' ').toLowerCase();
+          if (/lock|locked|secret|private|hidden|비공개|잠금|자물쇠/.test(attrs)) return true;
+          try {
+            var before = getComputedStyle(node, '::before');
+            var after = getComputedStyle(node, '::after');
+            var pseudo = ((before.content || '') + ' ' + (after.content || '') + ' ' +
+              (before.backgroundImage || '') + ' ' + (after.backgroundImage || '')).toLowerCase();
+            if (/lock|secret|private|hidden|비공개|잠금/.test(pseudo)) return true;
+          } catch (e) {}
+        }
+        return false;
+      }
+
+      function getLinkInfo(link) {
+        var clone = link.cloneNode(true);
+        var cnt = clone.querySelector('.c_cnt');
+        if (cnt) cnt.remove();
+        return {
+          name: clone.textContent.trim(),
+          href: link.getAttribute('href') || ''
+        };
+      }
+
+      function isPrivateCategory(name, href) {
+        var n = normalizeName(name);
+        var h = normalizeHref(href);
+        var path = h.replace(/^https?:\/\/[^/]+/, '').replace(/^\//, '');
+        if (privateNames.has(n)) return true;
+        if (privateHrefs.has(h)) return true;
+        for (var p of privatePaths) {
+          var parts = path.split('/').filter(Boolean);
+          var target = p.split('/').filter(Boolean);
+          if (target.length && target.length <= parts.length &&
+              target.every(function(v, i) { return parts[i] === v; })) return true;
+        }
+        return false;
+      }
+
+      window.checkIsPostPrivate = function(catName, catHref) {
+        return isPrivateCategory(catName, catHref);
+      };
+
+      function removePrivateMenus() {
+        var links = document.querySelectorAll(
+          '.header .area-gnb .category_list a, .box-category .category_list a'
+        );
+        links.forEach(function(link) {
+          var info = getLinkInfo(link);
+          var li = link.closest('li');
+          if (!li) return;
+          if (isPrivateCategory(info.name, info.href) || hasLockMarker(link) || hasLockMarker(li)) {
+            li.setAttribute('data-is-private', 'true');
+            li.remove();
+          }
+        });
+
+        document.querySelectorAll('.category_list > li').forEach(function(parentLi) {
+          var sub = parentLi.querySelector(':scope > .sub_category_list');
+          if (sub && !sub.querySelector(':scope > li')) sub.remove();
+        });
+      }
+
+      function filterVisibleArticles() {
+        var articles = document.querySelectorAll(
+          '.area-common .article-type-common, .area-main article.article-type-common, .list-recent li'
+        );
+        articles.forEach(function(item) {
+          var catEl = item.querySelector('.link-category, .box-meta a, .category');
+          if (!catEl) return;
+          if (isPrivateCategory(catEl.textContent.trim(), catEl.getAttribute('href') || '')) item.remove();
+        });
+      }
+
+      function applyPrivacyFilter() {
+        removePrivateMenus();
+        filterVisibleArticles();
+        return true;
+      }
+
+      // 하드코딩 없이 티스토리 관리 데이터에서 비공개 카테고리를 읽습니다.
+      window.PRIVACY_READY = fetch('/manage/category.json', {
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error('category.json HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        collectPrivateCategories(data);
+        console.info('[Privacy Filter] private categories:', Array.from(privateNames));
+        applyPrivacyFilter();
+        return true;
+      })
+      .catch(function(err) {
+        // 비로그인 방문자는 티스토리가 공개 페이지에 내려준 잠금 표식만 보조적으로 사용합니다.
+        console.info('[Privacy Filter] category.json unavailable:', err);
+        applyPrivacyFilter();
+        return false;
+      });
+
+      function rerun() { window.PRIVACY_READY.then(applyPrivacyFilter); }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rerun);
+      else rerun();
+      window.addEventListener('load', rerun);
+      setTimeout(rerun, 500);
+      setTimeout(rerun, 1500);
+    })();
+  </script>
+
+<!-- 메인 페이지 최신글 뉴스 헤드라인 & 카테고리별 2열 노출 스크립트 (비공개 완전 배제) -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      window.PRIVACY_READY.then(function() {
       const pathname = window.location.pathname;
       const search = window.location.search;
       const isMainPage = (pathname === '/' || pathname === '' || pathname === '/index.html' || document.body.id === 'tt-body-index') && (!search || search.indexOf('page=') !== -1);
@@ -1279,12 +1466,11 @@
       const areaPaging = document.querySelector('.area-paging');
       const areaPagingMore = document.querySelector('.area-paging-more');
 
-      // 글 요소에서 데이터(제목, 요약문, 썸네일, 날짜, 카테고리 등) 추출 함수
+      // 글 데이터 추출 함수
       function parseArticleElement(art) {
         const linkEl = art.querySelector('a.link-article') || art.querySelector('a');
         const postUrl = linkEl ? linkEl.getAttribute('href') : '#';
         
-        // 썸네일 스타일 추출
         let thumbStyle = '';
         const thumbEl = art.querySelector('.thumbnail');
         const imgEl = art.querySelector('.img-thumbnail, img');
@@ -1306,14 +1492,12 @@
           }
         }
 
-        // 제목 추출
         let titleText = '';
         const titleEl = art.querySelector('.title, .title-article, strong.title, a.link-article strong, strong, h2, h3');
         if (titleEl) {
           titleText = titleEl.textContent.trim();
         }
 
-        // 요약문 추출
         let summaryText = '';
         const summaryEl = art.querySelector('.summary, .desc, p.summary, p.desc');
         if (summaryEl) {
@@ -1328,9 +1512,13 @@
 
         const catEl = art.querySelector('.link-category');
         const catText = catEl ? catEl.textContent.trim() : '';
+        const catHref = catEl ? catEl.getAttribute('href') : '';
 
         const replyEl = art.querySelector('.reply');
         const replyText = replyEl ? replyEl.textContent.trim() : '';
+
+        // 비공개 여부 확인
+        const isPrivate = window.checkIsPostPrivate ? window.checkIsPostPrivate(catText, catHref) : false;
 
         return {
           url: postUrl,
@@ -1339,11 +1527,12 @@
           summary: summaryText,
           date: dateText,
           category: catText,
-          reply: replyText
+          reply: replyText,
+          isPrivate: isPrivate
         };
       }
 
-      // 신문형 5개 기사 뉴스 헤드라인 HTML 생성 함수
+      // 헤드라인 HTML 렌더러
       function renderHeadlineHtml(posts) {
         if (!posts || posts.length === 0) return '';
         const p0 = posts[0];
@@ -1354,11 +1543,9 @@
 
         let html = '<div class="area-cover area-cover-news-headline">';
         html += '  <div class="news-headline-wrap">';
-        
-        // 1. 좌측 메인 영역 (68~70%)
         html += '    <div class="news-headline-left">';
         
-        // 1번 Hero 기사 (상단 전체 너비 대형 제목 + 좌측 대형 이미지 / 우측 본문 요약문)
+        // Hero 기사
         html += '      <article class="news-hero-article">';
         html += '        <a href="' + p0.url + '" class="hero-title-link">';
         html += '          <h2 class="hero-title">' + escapeHtml(p0.title) + '</h2>';
@@ -1388,7 +1575,7 @@
         html += '        </div>';
         html += '      </article>';
 
-        // 2번, 3번 서브 기사 (좌측 하단 2열 배치)
+        // 서브 2열 기사
         if (p1 || p2) {
           html += '      <div class="news-divider"></div>';
           html += '      <div class="news-sub-row">';
@@ -1421,13 +1608,12 @@
           html += '      </div>';
         }
 
-        html += '    </div>'; // end news-headline-left
+        html += '    </div>';
 
-        // 2. 우측 사이드 영역 (30~32% - 4, 5번 기사 수직 2단 배치, 제목/썸네일만 노출)
+        // 우측 사이드 2단 기사
         if (p3 || p4) {
           html += '    <div class="news-headline-right">';
           
-          // 4번 기사
           if (p3) {
             html += '      <article class="news-side-article">';
             html += '        <a href="' + p3.url + '" class="side-thumb-link link-thumb">';
@@ -1453,7 +1639,6 @@
             html += '      <div class="news-divider"></div>';
           }
 
-          // 5번 기사
           if (p4) {
             html += '      <article class="news-side-article">';
             html += '        <a href="' + p4.url + '" class="side-thumb-link link-thumb">';
@@ -1475,44 +1660,43 @@
             html += '      </article>';
           }
 
-          html += '    </div>'; // end news-headline-right
+          html += '    </div>';
         }
 
-        html += '  </div>'; // end news-headline-wrap
-        html += '</div>'; // end area-cover-news-headline
+        html += '  </div>';
+        html += '</div>';
 
         return html;
       }
 
-      // 티스토리 관리자 커버 설정이 활성화되어 있지 않고, 메인 홈 페이지인 경우 자동 로딩 실행
       if (isMainPage && !existingCover && (headlineSection || categorySection)) {
         if (areaList) areaList.style.display = 'none';
         if (areaView) areaView.style.display = 'none';
         if (areaPaging) areaPaging.style.display = 'none';
         if (areaPagingMore) areaPagingMore.style.display = 'none';
 
-        // 1. 최신글 5개 로딩 및 헤드라인 렌더링
+        // 1. 헤드라인 기사 로딩
         if (headlineSection) {
           const domArticles = Array.from(document.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common'));
+          const validPosts = domArticles.map(parseArticleElement).filter(function(p) { return !p.isPrivate; });
           
-          if (domArticles.length >= 3) {
-            const latestPosts = domArticles.slice(0, 5).map(parseArticleElement);
-            headlineSection.innerHTML = renderHeadlineHtml(latestPosts);
+          if (validPosts.length >= 3) {
+            headlineSection.innerHTML = renderHeadlineHtml(validPosts.slice(0, 5));
             headlineSection.style.display = 'block';
           } else {
-            // DOM에 글이 부족할 경우 /category(전체 글 목록)를 비동기 fetch
             fetch('/category')
               .then(function(res) {
-                if (!res.ok) throw new Error('Fetch /category failed');
+                if (!res.ok) throw new Error('Fetch failed');
                 return res.text();
               })
               .then(function(htmlText) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, 'text/html');
                 const fetchedArticles = Array.from(doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common'));
-                if (fetchedArticles.length > 0) {
-                  const latestPosts = fetchedArticles.slice(0, 5).map(parseArticleElement);
-                  headlineSection.innerHTML = renderHeadlineHtml(latestPosts);
+                const filteredPosts = fetchedArticles.map(parseArticleElement).filter(function(p) { return !p.isPrivate; });
+
+                if (filteredPosts.length > 0) {
+                  headlineSection.innerHTML = renderHeadlineHtml(filteredPosts.slice(0, 5));
                   headlineSection.style.display = 'block';
                 }
               })
@@ -1526,13 +1710,17 @@
         if (categorySection) {
           categorySection.style.display = 'block';
 
-          // 1차 카테고리 목록 추출
+          // 실제 DOM에서 살아남은(공개된) 카테고리 링크만 획득
           const categoryLinks = Array.from(document.querySelectorAll('.area-gnb .topnavmenu .category_list > li > a.link_item, .box-category .category_list > li > a.link_item'));
-          
           const uniqueCategories = [];
           const seenUrls = new Set();
 
           categoryLinks.forEach(function(link) {
+            const li = link.closest('li');
+            if (li && (li.getAttribute('data-is-private') === 'true' || li.style.display === 'none')) {
+              return;
+            }
+
             const href = link.getAttribute('href');
             if (href && href !== '/category' && href !== '#' && !seenUrls.has(href)) {
               seenUrls.add(href);
@@ -1541,7 +1729,7 @@
               if (cntSpan) cntSpan.remove();
               const catName = clone.textContent.trim();
 
-              if (catName) {
+              if (catName && (!window.checkIsPostPrivate || !window.checkIsPostPrivate(catName, href))) {
                 uniqueCategories.push({
                   name: catName,
                   url: href
@@ -1565,18 +1753,16 @@
                   const articles = doc.querySelectorAll('.area-common .article-type-common, .area-main article.article-type-common');
                   
                   const posts = [];
-                  const maxCount = Math.min(articles.length, 3); // 각 카테고리당 최신 글 3개
-
-                  for (let i = 0; i < maxCount; i++) {
+                  for (let i = 0; i < articles.length; i++) {
+                    if (posts.length >= 3) break;
                     const parsed = parseArticleElement(articles[i]);
-                    if (!parsed.category) parsed.category = cat.name;
-                    posts.push(parsed);
+                    if (!parsed.isPrivate) {
+                      if (!parsed.category) parsed.category = cat.name;
+                      posts.push(parsed);
+                    }
                   }
 
-                  return {
-                    category: cat,
-                    posts: posts
-                  };
+                  return { category: cat, posts: posts };
                 })
                 .catch(function(err) {
                   console.warn('[Category Loader] Error fetching ' + cat.name, err);
@@ -1633,7 +1819,7 @@
         }
       }
 
-      // 3. 포스팅 상세 페이지 본문 우측 해당 카테고리 최신글 10개 랭킹 비동기 로더
+      // 3. 본문 우측 사이드 랭킹 위젯
       const rankListContainer = document.getElementById('category-rank-list');
       if (rankListContainer) {
         const postCategoryEl = document.querySelector('.article-header .box-meta .category, .area-view .category, .category-rank-cat');
@@ -1641,7 +1827,6 @@
         
         let categoryUrl = '';
         if (rawCatName && rawCatName !== '전체' && rawCatName !== '분류없음' && rawCatName !== '카테고리 없음') {
-          // GNB / 사이드바 메뉴에서 일치하는 카테고리 URL 검색
           const allCatLinks = Array.from(document.querySelectorAll('.area-gnb a, .box-category a, .tt_category a'));
           for (let link of allCatLinks) {
             const clone = link.cloneNode(true);
@@ -1687,6 +1872,15 @@
 
           articleEls.forEach(function(art) {
             if (posts.length >= 10) return;
+            const catEl = art.querySelector('.link-category, .box-meta a');
+            const catText = catEl ? catEl.textContent.trim() : '';
+            const catHref = catEl ? catEl.getAttribute('href') : '';
+
+            // 비공개 글은 사이드 랭킹에서도 배제
+            if (window.checkIsPostPrivate && window.checkIsPostPrivate(catText, catHref)) {
+              return;
+            }
+
             const linkEl = art.querySelector('a.link-article') || art.querySelector('a');
             const titleEl = art.querySelector('.title, .title-article, strong.title, strong, h2, h3');
             if (linkEl && titleEl) {
@@ -1749,6 +1943,7 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#039;");
       }
+      });
     });
   </script>
 
