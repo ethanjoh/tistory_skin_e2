@@ -5031,7 +5031,7 @@ hr[data-ke-style='style8'],
   }
 
   /* ========================================================
-     [모바일 전용: 767px 이하] 글 목록: 카드 형태 감싸기 + 가로 레이아웃(텍스트 좌 + 썸네일 우) 유지
+     [모바일 전용: 767px 이하] 글 목록: 카드 형태 감싸기 + 가로 레이아웃(썸네일 좌 + 텍스트 우)
      ======================================================== */
   @media screen and (max-width: 767px) {
     .article-type-common,
@@ -5043,7 +5043,7 @@ hr[data-ke-style='style8'],
     .article-type-thumbnail,
     .article-type-text {
       display: flex !important;
-      flex-direction: row-reverse !important;
+      flex-direction: row !important;
       justify-content: space-between !important;
       align-items: stretch !important;
       width: 100% !important;
@@ -5058,7 +5058,7 @@ hr[data-ke-style='style8'],
       overflow: hidden !important;
     }
 
-    /* 썸네일을 감싸는 직계 a 태그: 우측 끝에 완전히 밀착 */
+    /* 썸네일을 감싸는 직계 a 태그: 좌측 끝에 완전히 밀착 */
     .article-type-common > a.link-article,
     .article-type-poster > a.link-article,
     .article-type-crop > a.link-article,
@@ -5111,7 +5111,7 @@ hr[data-ke-style='style8'],
       display: none !important;
     }
 
-    /* 좌측 텍스트 영역: 카드 내부 여백 제공 */
+    /* 우측 텍스트 영역: 카드 내부 여백 제공 */
     .article-type-common > .article-content,
     .article-type-crop .article-content,
     .article-type-resize .article-content,
@@ -5124,7 +5124,7 @@ hr[data-ke-style='style8'],
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
-      padding: 14px 12px 14px 14px !important;
+      padding: 14px 14px 14px 12px !important;
       margin: 0 !important;
       display: flex !important;
       flex-direction: column !important;
