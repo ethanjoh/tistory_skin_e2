@@ -2,6 +2,30 @@
 
 # CHANGELOG
 
+## [2026-09-20] - 1240px 해상도 좌우 여백 확보 및 데스크톱 컨테이너 패딩 통일
+
+### 변경 목적
+- 1240px 등 1480px 미만의 데스크톱 환경에서 본문 카드 그리드, 프로모션 배너 텍스트, 헤더 등이 브라우저 창 좌우 끝에 완전히 밀착(0px)되어 꽉 차 보이던 현상을 해결하고, 양쪽에 40px의 시원한 안전 여백 조성
+
+### 주요 결정 사항
+1. **메인 본문 영역 좌우 40px 패딩 부여 (`style.css`)**:
+   - 데스크톱 미디어 쿼리(`@media screen and (min-width: 1061px)`) 내 `.area-main, .wrap-drawer .area-main`에 `padding: 0 40px !important; box-sizing: border-box !important;`를 적용하여 1240px 창에서 본문 카드 그리드 양쪽에 40px(총 80px)의 여백 확보.
+2. **헤더 및 프로모션 배너 패딩 동기화 (`style.css`)**:
+   - 상단 헤더(`.header .inner-header`): 좌우 패딩을 기존 20px에서 `40px`(`padding: 25px 40px 10px 40px !important; box-sizing: border-box !important;`)로 확장.
+   - 프로모션 배너(`.header .area-promotion .inner-promotion`): `padding: 0 40px !important; box-sizing: border-box !important;`를 추가하여 배너 문구("보급형 방구석 개발자")가 좌측 40px 정렬 라인에 일치하도록 개선.
+3. **하단 위젯, 푸터, 카테고리 배너, 글 상세 헤더 패딩 일치 (`style.css`)**:
+   - `.inner-bottom-widget`, `#footer .inner-footer`, `.use-category-banner .category-banner .category-banner-inner`, `.article-header .inner-header`의 좌우 패딩을 `40px`로 통일하여 사이트 전반의 세로 정렬 라인 일치.
+
+### 수정한 파일
+- `style.css`: 데스크톱 미디어 쿼리 내 본문, 헤더, 배너, 위젯, 푸터의 좌우 패딩 40px 일치 및 box-sizing 적용
+- `CHANGELOG.md`: 작업 내역 기록
+
+### 테스트 결과
+- 1240px 창 해상도에서 양옆에 40px씩 안전 여백이 형성되어 본문 콘텐츠(1160px) 및 상단 배너, 헤더, 푸터가 조화롭게 정렬됨을 검증
+- 1480px 이상의 와이드 모니터(중앙 정렬 유지) 및 1060px 이하 모바일 환경(모바일 전용 패딩 유지)에 부작용 없음 확인
+
+---
+
 ## [2026-09-16] - 모바일 카테고리 글 목록 카드 썸네일 좌측 배치 변경
 
 ### 변경 목적

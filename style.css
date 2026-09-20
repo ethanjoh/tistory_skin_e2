@@ -4271,6 +4271,8 @@ hr[data-ke-style='style8'],
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 auto !important;
+    padding: 0 40px !important;
+    box-sizing: border-box !important;
   }
 
   /* 2. 상단 1층: 좌측 로고, 우측 검색창 */
@@ -4286,7 +4288,8 @@ hr[data-ke-style='style8'],
     position: relative !important;
     max-width: 1480px !important;
     margin: 0 auto !important;
-    padding: 25px 20px 10px 20px !important;
+    padding: 25px 40px 10px 40px !important;
+    box-sizing: border-box !important;
     overflow: visible !important;
   }
 
@@ -4522,6 +4525,8 @@ hr[data-ke-style='style8'],
   .header .area-promotion .inner-promotion {
     max-width: 1480px !important;
     margin: 0 auto !important;
+    padding: 0 40px !important;
+    box-sizing: border-box !important;
   }
 
   .header .area-promotion .inner-promotion strong {
@@ -4838,6 +4843,21 @@ hr[data-ke-style='style8'],
     font-size: 12px !important;
     color: #888 !important;
     margin: 0 !important;
+  }
+
+  /* 7. 하단 위젯, 푸터, 카테고리 배너, 글 상세 헤더 데스크톱 패딩(40px) 통일 */
+  .inner-bottom-widget,
+  #footer .inner-footer,
+  .use-category-banner .category-banner .category-banner-inner,
+  .article-header .inner-header {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+    box-sizing: border-box !important;
+  }
+
+  .use-category-banner .category-banner .category-banner-inner {
+    max-width: 1480px !important;
+    margin: 0 auto !important;
   }
 }
 
